@@ -8,7 +8,7 @@ Experiencia de streaming estática construida con Astro para convertir playlists
 - Ficha de cada serie con selector de temporadas y lista de episodios.
 - Reproductor basado en la YouTube IFrame API con salto automático al siguiente episodio.
 - “Mi lista”, progreso, capítulo pendiente y episodios vistos guardados en `localStorage`.
-- Playlist Studio local para importar playlists y editar o eliminar series y capítulos, también de forma masiva, con idioma, edad recomendada, descripción y tags.
+- Playlist Studio local para importar playlists, editar series y capítulos y crear listas editoriales para la portada.
 - Detección automática de patrones de temporada/capítulo en español e inglés.
 - Omisión automática de vídeos privados o que no permiten reproducción embebida.
 - Rutas estáticas en español (`/`) e inglés (`/en/`).
@@ -48,7 +48,7 @@ La opción más cómoda es arrancar la interfaz local y abrir la dirección que 
 npm run playlist:ui
 ```
 
-La interfaz está en `.local/playlist-admin/` y Git la ignora, por lo que no se publica junto a la web. Desde ella también puedes modificar el idioma, la edad recomendada, la descripción, los tags y el resto de metadatos; filtrar y seleccionar episodios; renumerar o mover temporadas; y hacer eliminaciones masivas.
+La interfaz está en `.local/playlist-admin/` y Git la ignora, por lo que no se publica junto a la web. Desde ella también puedes crear listas para la portada y elegir sus series; modificar el idioma, la edad recomendada, la descripción, los tags y el resto de metadatos; filtrar y seleccionar episodios; renumerar o mover temporadas; y hacer eliminaciones masivas.
 
 También puedes exportar la clave en tu terminal y ejecutar el importador:
 

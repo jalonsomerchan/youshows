@@ -16,7 +16,10 @@ Después abre `http://127.0.0.1:4310`. Playlist Studio permite importar y admini
 
 El editor incluye:
 
+- Creación y edición de listas editoriales para la portada, con títulos en español e inglés.
+- Selección de las series que forman parte de cada lista y eliminación segura de listas.
 - Edición y eliminación de series, incluidos título, descripción, géneros, tags, idioma, edad recomendada, año e imágenes.
+- Varias series pueden marcarse como destacadas; la portada las presenta en un carrusel. Si no se marca ninguna, se utiliza la primera del catálogo.
 - Edición individual de título, descripción, temporada, número, vídeo de YouTube y miniatura de cada capítulo.
 - Filtros por serie, temporada y texto, además de selección de todos los capítulos visibles.
 - Cambios masivos para buscar y reemplazar títulos, mover capítulos de temporada, renumerarlos y asignar una descripción común.
@@ -76,6 +79,8 @@ Cuando un título no contiene numeración reconocible se asigna a la temporada 1
 ## Modelo de datos
 
 Cada serie contiene descripción, arte, géneros, tags, idioma, edad recomendada y una lista de temporadas. `language` utiliza códigos estables como `es`, `ca`, `en` o `none`; `ageRating` admite `all`, `3`, `7`, `12`, `16`, `18` o `none`. Las etiquetas visibles se traducen en la interfaz.
+
+El catálogo también puede incluir `lists`. Cada lista tiene un `id` estable, un título para cada idioma configurado y un array `seriesIds`. El orden de las listas y de sus IDs determina el orden visible en la portada. Las listas vacías no se muestran. Si una serie se elimina desde Playlist Studio, su ID también se retira de todas las listas para no dejar referencias rotas.
 
 Cada episodio conserva un `youtubeId`, duración, miniatura, título, descripción y números de temporada/episodio. Los identificadores `series.id` deben ser slugs estables porque forman parte de las URLs y de las claves guardadas en el navegador.
 

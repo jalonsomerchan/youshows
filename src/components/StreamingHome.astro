@@ -1,6 +1,6 @@
 ---
 import type { Locale } from '../config/site';
-import { catalog, getLatestPublishedAt } from '../data/catalog';
+import { catalog, getCatalogLists, getLatestPublishedAt } from '../data/catalog';
 import { useTranslations } from '../i18n/ui';
 import CatalogRail from './CatalogRail.astro';
 import FeaturedCarousel from './FeaturedCarousel.astro';
@@ -13,6 +13,7 @@ const markedAsFeatured = catalog.series.filter((series) => series.featured);
 const featuredSeries = markedAsFeatured.length > 0 ? markedAsFeatured : catalog.series.slice(0, 1);
 const hasFeaturedSeries = featuredSeries.length > 0;
 const railLimit = 12;
+const catalogLists = getCatalogLists(locale);
 const curatedRails = [
   {
     id: 'in-spanish',
@@ -77,6 +78,15 @@ const curatedRails = [
       {catalog.series.map((series) => <ShowCard series={series} locale={locale} class="library-card" />)}
     </div>
   </section>
+
+  {catalogLists.map((list) => (
+    <CatalogRail
+      id={`catalog-list-${list.id}`}
+      title={list.title}
+      series={list.series}
+      locale={locale}
+    />
+  ))}
 
   <section class="content-rail" id="catalog" aria-labelledby="catalog-title">
     <div class="section-heading"><h2 id="catalog-title">{t('home.explore')}</h2><span>{t('home.exploreHint')}</span></div>

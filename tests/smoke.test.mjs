@@ -219,8 +219,24 @@ describe('project smoke checks', () => {
 
   it('keeps catalog series, seasons and episodes structurally valid', () => {
     const catalog = readJson('src/data/catalog.json');
+    const { locales } = getConfiguredI18n();
     assert.equal(catalog.version, 1);
+    assert.ok(Array.isArray(catalog.lists));
     assert.ok(Array.isArray(catalog.series));
+    const seriesIds = new Set(catalog.series.map((series) => series.id));
+    const listIds = new Set();
+    catalog.lists.forEach((list) => {
+      assert.match(list.id, /^[a-z0-9-]+$/);
+      assert.equal(listIds.has(list.id), false, `duplicate list id: ${list.id}`);
+      listIds.add(list.id);
+      assert.deepEqual(Object.keys(list.titles).sort(), [...locales].sort());
+      locales.forEach((locale) => assert.ok(list.titles[locale].trim()));
+      assert.ok(Array.isArray(list.seriesIds));
+      assert.equal(new Set(list.seriesIds).size, list.seriesIds.length);
+      list.seriesIds.forEach((seriesId) => {
+        assert.ok(seriesIds.has(seriesId), `unknown series ${seriesId} in list ${list.id}`);
+      });
+    });
     catalog.series.forEach((series) => {
       assert.match(series.id, /^[a-z0-9-]+$/);
       assert.ok(Array.isArray(series.tags));

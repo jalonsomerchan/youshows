@@ -1,5 +1,6 @@
-import catalogJson from './catalog.json';
+import { defaultLocale, type Locale } from '../config/site';
 import type { SeriesAgeRating, SeriesLanguage } from '../config/series-metadata';
+import catalogJson from './catalog.json';
 
 export interface Episode {
   id: string;
@@ -35,9 +36,22 @@ export interface Series {
   seasons: Season[];
 }
 
+export interface CatalogList {
+  id: string;
+  titles: Record<Locale, string>;
+  seriesIds: string[];
+}
+
+export interface ResolvedCatalogList {
+  id: string;
+  title: string;
+  series: Series[];
+}
+
 export interface Catalog {
   version: number;
   series: Series[];
+  lists?: CatalogList[];
 }
 
 export const catalog = catalogJson as Catalog;
@@ -67,4 +81,19 @@ export function getLatestPublishedAt(series: Series): number {
       }, latestInSeries),
     0
   );
+}
+
+export function getCatalogLists(locale: Locale): ResolvedCatalogList[] {
+  const seriesById = new Map(catalog.series.map((series) => [series.id, series]));
+
+  return (catalog.lists ?? [])
+    .map((list) => ({
+      id: list.id,
+      title: list.titles[locale] ?? list.titles[defaultLocale] ?? '',
+      series: list.seriesIds.flatMap((seriesId) => {
+        const series = seriesById.get(seriesId);
+        return series ? [series] : [];
+      }),
+    }))
+    .filter((list) => list.title && list.series.length > 0);
 }
