@@ -57,3 +57,14 @@ export function getNextEpisode(series: Series, episodeId: string): Episode | und
   const currentIndex = episodes.findIndex((episode) => episode.id === episodeId);
   return currentIndex >= 0 ? episodes[currentIndex + 1] : undefined;
 }
+
+export function getLatestPublishedAt(series: Series): number {
+  return series.seasons.reduce(
+    (latestInSeries, season) =>
+      season.episodes.reduce((latest, episode) => {
+        const publishedAt = Date.parse(episode.publishedAt);
+        return Number.isNaN(publishedAt) ? latest : Math.max(latest, publishedAt);
+      }, latestInSeries),
+    0
+  );
+}

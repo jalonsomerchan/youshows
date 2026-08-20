@@ -1,7 +1,8 @@
 ---
 import type { Locale } from '../config/site';
-import { catalog } from '../data/catalog';
+import { catalog, getLatestPublishedAt } from '../data/catalog';
 import { useTranslations } from '../i18n/ui';
+import CatalogRail from './CatalogRail.astro';
 import FeaturedHero from './FeaturedHero.astro';
 import ShowCard from './ShowCard.astro';
 
@@ -9,6 +10,31 @@ interface Props { locale: Locale; }
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const featured = catalog.series.find((series) => series.featured) ?? catalog.series[0];
+const railLimit = 12;
+const curatedRails = [
+  {
+    id: 'in-spanish',
+    title: t('home.inSpanish'),
+    series: catalog.series.filter((series) => series.language === 'es').slice(0, railLimit),
+  },
+  {
+    id: 'in-catalan',
+    title: t('home.inCatalan'),
+    series: catalog.series.filter((series) => series.language === 'ca').slice(0, railLimit),
+  },
+  {
+    id: 'in-english',
+    title: t('home.inEnglish'),
+    series: catalog.series.filter((series) => series.language === 'en').slice(0, railLimit),
+  },
+  {
+    id: 'new-releases',
+    title: t('home.newReleases'),
+    series: [...catalog.series]
+      .sort((first, second) => getLatestPublishedAt(second) - getLatestPublishedAt(first))
+      .slice(0, railLimit),
+  },
+];
 ---
 
 <div data-streaming-home>
@@ -60,6 +86,10 @@ const featured = catalog.series.find((series) => series.featured) ?? catalog.ser
       <button class="button button--soft" type="button" data-settings-open>{t('settings.adjust')}</button>
     </div>
   </section>
+
+  {curatedRails.map((rail) => (
+    <CatalogRail {...rail} locale={locale} />
+  ))}
 </div>
 </div>
 
@@ -74,12 +104,12 @@ const featured = catalog.series.find((series) => series.featured) ?? catalog.ser
   .empty-catalog p { margin: 0 0 .6rem; color: var(--color-primary); font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
   .empty-catalog h1 { margin: 0; font-size: clamp(2rem, 9vw, 3.5rem); letter-spacing: -.055em; line-height: 1; }
   .empty-catalog span { display: block; max-width: 36rem; margin: 1rem auto 0; color: var(--color-text-muted); }
-  .content-rail { margin-top: 2.25rem; }
-  .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: .8rem; }
-  .section-heading h2 { margin: 0; font-size: clamp(1.25rem, 4vw, 1.75rem); letter-spacing: -.03em; }
-  .section-heading span { display: none; color: var(--color-text-soft); font-size: .8rem; }
-  .rail, .search-results { display: flex; gap: .85rem; margin-inline: -1rem; padding: .35rem 1rem 1.25rem; overflow-x: auto; overscroll-behavior-inline: contain; scroll-padding-inline: 1rem; scroll-snap-type: inline proximity; scrollbar-width: none; }
-  .rail::-webkit-scrollbar { display: none; }
+  :global(.content-rail) { margin-top: 2.25rem; }
+  :global(.section-heading) { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: .8rem; }
+  :global(.section-heading h2) { margin: 0; font-size: clamp(1.25rem, 4vw, 1.75rem); letter-spacing: -.03em; }
+  :global(.section-heading span) { display: none; color: var(--color-text-soft); font-size: .8rem; }
+  :global(.rail), .search-results { display: flex; gap: .85rem; margin-inline: -1rem; padding: .35rem 1rem 1.25rem; overflow-x: auto; overscroll-behavior-inline: contain; scroll-padding-inline: 1rem; scroll-snap-type: inline proximity; scrollbar-width: none; }
+  :global(.rail::-webkit-scrollbar) { display: none; }
   .search-section { scroll-margin-top: 5rem; }
   .search-section > label { display: block; margin-bottom: .55rem; font-size: .85rem; font-weight: 750; }
   .search-field { position: relative; }
@@ -93,6 +123,6 @@ const featured = catalog.series.find((series) => series.featured) ?? catalog.ser
   .preferences-empty span { color: var(--color-text-muted); font-size: .9rem; }
   .preferences-empty .button { margin-top: .35rem; }
   [hidden] { display: none !important; }
-  @media (min-width: 640px) { .home-content { margin-top: -2.25rem; padding-inline: 2rem; } .rail, .search-results { margin-inline: -2rem; padding-inline: 2rem; } .section-heading span { display: inline; } }
-  @media (min-width: 1024px) { .home-content { padding-inline: 3rem; } .rail, .search-results { margin-inline: -3rem; padding-inline: 3rem; } }
+  @media (min-width: 640px) { .home-content { margin-top: -2.25rem; padding-inline: 2rem; } :global(.rail), .search-results { margin-inline: -2rem; padding-inline: 2rem; } :global(.section-heading span) { display: inline; } }
+  @media (min-width: 1024px) { .home-content { padding-inline: 3rem; } :global(.rail), .search-results { margin-inline: -3rem; padding-inline: 3rem; } }
 </style>

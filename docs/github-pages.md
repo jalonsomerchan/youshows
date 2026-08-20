@@ -109,9 +109,26 @@ Incorrecto:
 2. Configura Node 22.
 3. Ejecuta `npm ci`.
 4. Ejecuta `npm test`.
-5. Ejecuta `npm run build`.
-6. Sube `dist` como artifact de Pages.
-7. Despliega con `actions/deploy-pages@v4`.
+5. Lee con `actions/configure-pages@v6` el origen y la subruta reales de Pages.
+6. Ejecuta `npm run build` con esos valores en `ASTRO_SITE` y `ASTRO_BASE`.
+7. Sube `dist` como artifact de Pages.
+8. Despliega con `actions/deploy-pages@v5`.
+
+El workflow usa los outputs `origin` y `base_path` de `configure-pages`. Así, un dominio propio
+se construye automáticamente con base `/`, mientras que una página de proyecto conserva la base
+`/nombre-repo`.
+
+### Activación inicial de Pages
+
+Antes de la primera ejecución, GitHub Pages debe estar habilitado en el repositorio:
+
+1. Abre **Settings > Pages**.
+2. En **Build and deployment**, selecciona **GitHub Actions** como fuente.
+3. Ejecuta de nuevo el workflow **Deploy to GitHub Pages**.
+
+Si `configure-pages` falla con `Get Pages site failed` y `Not Found`, normalmente esta activación
+inicial todavía no existe. No añadas `enablement: true` usando el `GITHUB_TOKEN` estándar: la acción
+requiere para ello otro token con permisos administrativos y de Pages.
 
 No mezcles este workflow con tareas pesadas o no relacionadas.
 
@@ -175,6 +192,8 @@ No volver a moverlo a `public/manifest.webmanifest` salvo que se resuelva bien `
 
 - ¿`npm run build` seguirá generando `dist/`?
 - ¿`pages.yml` sigue subiendo `./dist`?
+- ¿GitHub Pages está habilitado con **GitHub Actions** como fuente?
+- ¿El build usa `origin` y `base_path` obtenidos de `configure-pages`?
 - ¿Las rutas internas respetan `BASE_URL`?
 - ¿Los assets públicos enlazados manualmente respetan `BASE_URL`?
 - ¿Funciona con `ASTRO_BASE=/`?

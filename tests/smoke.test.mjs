@@ -220,7 +220,11 @@ describe('project smoke checks', () => {
     const pagesWorkflow = readText('.github/workflows/pages.yml');
     const ciWorkflow = readText('.github/workflows/ci.yml');
 
-    assert.match(pagesWorkflow, /actions\/deploy-pages@v4/);
+    assert.match(pagesWorkflow, /actions\/configure-pages@v6/);
+    assert.match(pagesWorkflow, /steps\.pages\.outputs\.origin/);
+    assert.match(pagesWorkflow, /steps\.pages\.outputs\.base_path/);
+    assert.match(pagesWorkflow, /actions\/upload-pages-artifact@v5/);
+    assert.match(pagesWorkflow, /actions\/deploy-pages@v5/);
     assert.match(pagesWorkflow, /npm run build/);
     assert.match(pagesWorkflow, /npm test/);
     assert.match(ciWorkflow, /pull_request/);

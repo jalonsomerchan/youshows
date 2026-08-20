@@ -77,6 +77,9 @@ function updateHomeUi(): void {
   if (results) results.hidden = !query;
   if (searchEmpty) searchEmpty.hidden = !query || searchCount > 0;
   if (catalogEmpty) catalogEmpty.hidden = catalogCount > 0;
+  home.querySelectorAll<HTMLElement>('[data-preference-section]').forEach((section) => {
+    section.hidden = !section.querySelector('[data-series-card]:not([hidden])');
+  });
 
   const featured = home.querySelector<HTMLElement>('[data-featured-series]');
   const featuredVisible = Boolean(featured && matchesPreferences(featured));
