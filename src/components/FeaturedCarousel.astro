@@ -1,0 +1,72 @@
+---
+import type { Locale } from '../config/site';
+import type { Series } from '../data/catalog';
+import { useTranslations } from '../i18n/ui';
+import FeaturedHero from './FeaturedHero.astro';
+
+interface Props {
+  series: Series[];
+  locale: Locale;
+}
+
+const { series, locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<section
+  class="featured-carousel"
+  aria-label={t('carousel.label')}
+  aria-roledescription={t('carousel.carousel')}
+  data-featured-carousel
+>
+  <div class="featured-carousel__slides">
+    {series.map((item, index) => (
+      <FeaturedHero series={item} locale={locale} index={index} isActive={index === 0} />
+    ))}
+  </div>
+
+  <div class="featured-carousel__controls" data-carousel-controls hidden>
+    <button class="featured-carousel__arrow" type="button" aria-label={t('carousel.previous')} data-carousel-previous>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></svg>
+    </button>
+
+    <div class="featured-carousel__dots" aria-label={t('carousel.choose')}>
+      {series.map((item, index) => (
+        <button
+          class="featured-carousel__dot"
+          type="button"
+          aria-controls={`featured-slide-${item.id}`}
+          aria-label={`${t('carousel.show')} ${item.title}`}
+          aria-current={index === 0 ? 'true' : undefined}
+          data-carousel-dot={item.id}
+        >
+          <span class="sr-only">{item.title}</span>
+        </button>
+      ))}
+    </div>
+
+    <span class="featured-carousel__count" data-carousel-count aria-hidden="true">1 / {series.length}</span>
+
+    <button class="featured-carousel__arrow" type="button" aria-label={t('carousel.next')} data-carousel-next>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg>
+    </button>
+  </div>
+
+  <p class="sr-only" aria-live="polite" aria-atomic="true" data-carousel-status>{series[0]?.title}</p>
+</section>
+
+<style>
+  .featured-carousel { position: relative; background: var(--color-bg); }
+  .featured-carousel__controls { position: absolute; z-index: 2; right: 1rem; bottom: 1.25rem; display: flex; align-items: center; gap: .55rem; }
+  .featured-carousel__arrow, .featured-carousel__dot { display: inline-grid; place-items: center; border: 1px solid color-mix(in srgb, var(--color-text), transparent 70%); background: color-mix(in srgb, var(--color-bg), transparent 12%); color: var(--color-text); box-shadow: var(--shadow-sm); cursor: pointer; backdrop-filter: blur(14px); transition: transform var(--transition-fast), background var(--transition-base), border-color var(--transition-base); }
+  .featured-carousel__arrow { width: 2.75rem; height: 2.75rem; border-radius: var(--radius-full); }
+  .featured-carousel__arrow:hover, .featured-carousel__dot:hover { transform: translateY(-1px); border-color: var(--color-text); background: var(--color-surface-raised); }
+  .featured-carousel__arrow svg { width: 1.35rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.25; }
+  .featured-carousel__dots { display: flex; align-items: center; gap: .4rem; }
+  .featured-carousel__dot { width: .7rem; height: .7rem; border-radius: var(--radius-full); padding: 0; box-shadow: none; }
+  .featured-carousel__dot[aria-current='true'] { width: 1.8rem; border-color: var(--color-primary); background: var(--color-primary); }
+  .featured-carousel__count { min-width: 3rem; color: var(--color-text-muted); font-size: .75rem; font-variant-numeric: tabular-nums; font-weight: 750; text-align: center; }
+  [hidden] { display: none !important; }
+  @media (min-width: 640px) { .featured-carousel__controls { right: 2rem; bottom: 2rem; } }
+  @media (min-width: 1024px) { .featured-carousel__controls { right: 3rem; bottom: 2.75rem; } }
+</style>

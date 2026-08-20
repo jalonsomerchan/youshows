@@ -3,13 +3,15 @@ import type { Locale } from '../config/site';
 import { catalog, getLatestPublishedAt } from '../data/catalog';
 import { useTranslations } from '../i18n/ui';
 import CatalogRail from './CatalogRail.astro';
-import FeaturedHero from './FeaturedHero.astro';
+import FeaturedCarousel from './FeaturedCarousel.astro';
 import ShowCard from './ShowCard.astro';
 
 interface Props { locale: Locale; }
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const featured = catalog.series.find((series) => series.featured) ?? catalog.series[0];
+const markedAsFeatured = catalog.series.filter((series) => series.featured);
+const featuredSeries = markedAsFeatured.length > 0 ? markedAsFeatured : catalog.series.slice(0, 1);
+const hasFeaturedSeries = featuredSeries.length > 0;
 const railLimit = 12;
 const curatedRails = [
   {
@@ -38,9 +40,10 @@ const curatedRails = [
 ---
 
 <div data-streaming-home>
-{featured ? <FeaturedHero series={featured} locale={locale} /> : null}
+{hasFeaturedSeries && <h1 class="sr-only">{t('home.title')}</h1>}
+{hasFeaturedSeries ? <FeaturedCarousel series={featuredSeries} locale={locale} /> : null}
 
-{!featured && (
+{!hasFeaturedSeries && (
   <section class="empty-catalog" aria-labelledby="empty-catalog-title">
     <p>{t('home.eyebrow')}</p>
     <h1 id="empty-catalog-title">{t('catalog.emptyTitle')}</h1>
@@ -48,7 +51,7 @@ const curatedRails = [
   </section>
 )}
 
-<div class:list={['home-content', { 'home-content--empty': !featured }]} data-home-content>
+<div class:list={['home-content', { 'home-content--empty': !hasFeaturedSeries }]} data-home-content>
   <section class="search-section" id="search" aria-labelledby="search-title">
     <label id="search-title" for="catalog-search">{t('search.label')}</label>
     <div class="search-field">

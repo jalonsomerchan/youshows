@@ -5,26 +5,40 @@ import { getEpisodes, type Series } from '../data/catalog';
 import { useTranslations } from '../i18n/ui';
 import { getSeriesPath, getWatchPath } from '../utils/streaming-paths';
 
-interface Props { series: Series; locale: Locale; }
-const { series, locale } = Astro.props;
+interface Props {
+  series: Series;
+  locale: Locale;
+  index: number;
+  isActive: boolean;
+}
+const { series, locale, index, isActive } = Astro.props;
 const t = useTranslations(locale);
 const episodes = getEpisodes(series);
 const languageLabel = getLanguageLabel(series.language, t);
 const ageRatingLabel = getAgeRatingLabel(series.ageRating, series.maturity, t);
 const watchPaths = Object.fromEntries(episodes.map((episode) => [episode.id, getWatchPath(series.id, episode.id, locale)]));
+const titleId = `featured-title-${series.id}`;
 ---
 
 <section
   class="featured"
-  aria-labelledby="featured-title"
+  id={`featured-slide-${series.id}`}
+  aria-labelledby={titleId}
+  aria-roledescription={t('carousel.slide')}
+  role="group"
   style={`--hero-image: url("${series.artwork.backdrop}")`}
   data-featured-series
+  data-featured-index={index}
+  data-featured-allowed="true"
+  data-series-id={series.id}
+  data-series-title={series.title}
   data-series-language={series.language}
   data-series-age-rating={series.ageRating}
+  hidden={!isActive}
 >
   <div class="featured__content">
     <span class="featured__eyebrow">{t('home.featured')}</span>
-    <h1 id="featured-title">{series.title}</h1>
+    <h2 id={titleId}>{series.title}</h2>
     <p>{series.description}</p>
     <div class="featured__meta">
       <span class="featured__match">{t('home.recommended')}</span>
@@ -58,7 +72,7 @@ const watchPaths = Object.fromEntries(episodes.map((episode) => [episode.id, get
   .featured::after { position: absolute; z-index: -1; inset: 0; background: linear-gradient(0deg, var(--color-bg) 0%, color-mix(in srgb, var(--color-bg), transparent 12%) 14%, transparent 55%), linear-gradient(90deg, color-mix(in srgb, var(--color-bg), transparent 10%) 0%, transparent 82%); content: ''; }
   .featured__content { width: min(100%, 90rem); margin-inline: auto; }
   .featured__eyebrow { display: inline-flex; margin-bottom: .75rem; border-radius: var(--radius-full); padding: .35rem .7rem; background: color-mix(in srgb, var(--color-primary), transparent 10%); color: white; font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-  .featured h1 { max-width: 18ch; margin: 0; font-size: clamp(2.25rem, 10vw, 5.75rem); font-weight: 900; letter-spacing: -.055em; line-height: .94; text-wrap: balance; }
+  .featured h2 { max-width: 18ch; margin: 0; font-size: clamp(2.25rem, 10vw, 5.75rem); font-weight: 900; letter-spacing: -.055em; line-height: .94; text-wrap: balance; }
   .featured p { display: -webkit-box; max-width: 38rem; margin: 1rem 0; overflow: hidden; color: var(--color-text-muted); font-size: clamp(.95rem, 2.5vw, 1.12rem); line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
   .featured__meta { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; color: var(--color-text-muted); font-size: .82rem; font-weight: 650; }
   .featured__match { color: var(--color-success); }

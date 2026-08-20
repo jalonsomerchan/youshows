@@ -4,6 +4,7 @@ import {
   allowsContent,
   getContentPreferences,
 } from './content-preferences';
+import { initializeFeaturedCarousels, syncFeaturedCarousels } from './featured-carousel';
 import {
   LIBRARY_EVENT,
   episodeKey,
@@ -14,6 +15,8 @@ import {
 
 const home = document.querySelector<HTMLElement>('[data-streaming-home]');
 const search = home?.querySelector<HTMLInputElement>('#catalog-search');
+
+if (home) initializeFeaturedCarousels(home);
 
 function matchesPreferences(item: HTMLElement): boolean {
   return allowsContent(
@@ -72,7 +75,9 @@ function updateHomeUi(): void {
   const libraryCount = home.querySelectorAll('.library-card:not([hidden])').length;
   const continueCount = home.querySelectorAll('.continue-card:not([hidden])').length;
   const searchCount = home.querySelectorAll('.search-card:not([hidden])').length;
-  const catalogCount = home.querySelectorAll('[data-catalog-list] [data-series-card]:not([hidden])').length;
+  const catalogCount = home.querySelectorAll(
+    '[data-catalog-list] [data-series-card]:not([hidden])'
+  ).length;
   const librarySection = home.querySelector<HTMLElement>('[data-library-section]');
   const continueSection = home.querySelector<HTMLElement>('[data-continue-section]');
   const results = home.querySelector<HTMLElement>('[data-search-results]');
@@ -87,10 +92,15 @@ function updateHomeUi(): void {
     section.hidden = !section.querySelector('[data-series-card]:not([hidden])');
   });
 
-  const featured = home.querySelector<HTMLElement>('[data-featured-series]');
-  const featuredVisible = Boolean(featured && matchesPreferences(featured));
-  if (featured) featured.hidden = !featuredVisible;
-  home.querySelector('[data-home-content]')?.classList.toggle('home-content--no-hero', !featuredVisible);
+  const featuredSlides = Array.from(home.querySelectorAll<HTMLElement>('[data-featured-series]'));
+  featuredSlides.forEach((slide) => {
+    slide.dataset.featuredAllowed = String(matchesPreferences(slide));
+  });
+  syncFeaturedCarousels(home);
+  const featuredVisible = featuredSlides.some((slide) => slide.dataset.featuredAllowed === 'true');
+  home
+    .querySelector('[data-home-content]')
+    ?.classList.toggle('home-content--no-hero', !featuredVisible);
 
   home.querySelectorAll<HTMLAnchorElement>('[data-resume-series]').forEach((link) => {
     const seriesId = link.dataset.resumeSeries ?? '';
