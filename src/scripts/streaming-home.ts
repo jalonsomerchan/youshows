@@ -4,7 +4,13 @@ import {
   allowsContent,
   getContentPreferences,
 } from './content-preferences';
-import { episodeKey, getLibrary, getResumeEpisodeId, toggleSeries } from './user-library';
+import {
+  LIBRARY_EVENT,
+  episodeKey,
+  getLibrary,
+  getResumeEpisodeId,
+  toggleSeries,
+} from './user-library';
 
 const home = document.querySelector<HTMLElement>('[data-streaming-home]');
 const search = home?.querySelector<HTMLInputElement>('#catalog-search');
@@ -103,7 +109,7 @@ document.addEventListener('click', (event) => {
 });
 
 search?.addEventListener('input', updateHomeUi);
-window.addEventListener('youshows:library', updateHomeUi);
+window.addEventListener(LIBRARY_EVENT, updateHomeUi);
 window.addEventListener(CONTENT_PREFERENCES_EVENT, updateHomeUi);
 window.addEventListener('storage', (event) => {
   if (event.key === CONTENT_PREFERENCES_STORAGE_KEY) updateHomeUi();

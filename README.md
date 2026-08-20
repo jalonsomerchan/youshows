@@ -1,4 +1,4 @@
-# YouShows
+# Alon Kids
 
 Experiencia de streaming estática construida con Astro para convertir playlists de YouTube en series con temporadas, episodios y reproducción continua. Está diseñada mobile first, funciona en modo claro y oscuro y no necesita backend para el catálogo ni para guardar la actividad del usuario.
 
@@ -13,7 +13,8 @@ Experiencia de streaming estática construida con Astro para convertir playlists
 - Omisión automática de vídeos privados o que no permiten reproducción embebida.
 - Rutas estáticas en español (`/`) e inglés (`/en/`).
 - Compatibilidad con dominio raíz, subruta y GitHub Pages.
-- SEO técnico, sitemap, manifest, robots y tests smoke.
+- PWA instalable con funcionamiento offline para páginas y recursos visitados.
+- SEO técnico, sitemap, manifest, robots, service worker y tests smoke.
 
 ## Requisitos
 
@@ -88,6 +89,11 @@ scripts/youtube/
 ├── add-playlist.mjs
 ├── parse-title.mjs
 └── youtube-api.mjs
+
+public/
+├── sw.js
+├── pwa-icon-192.png
+└── pwa-icon-512.png
 ```
 
 ## Persistencia y privacidad
@@ -105,10 +111,16 @@ El contenido importado conserva el título y la descripción de YouTube. Si se n
 La configuración calcula `base` automáticamente en GitHub Actions. También se puede comprobar localmente:
 
 ```sh
-ASTRO_SITE=https://usuario.github.io ASTRO_BASE=/youshows npm run build
+ASTRO_SITE=https://usuario.github.io ASTRO_BASE=/alon-kids npm run build
 ```
 
-Los enlaces internos usan helpers localizados y respetan `BASE_URL`, por lo que funcionan tanto en `/` como en `/youshows/`.
+Los enlaces internos, el manifest y el service worker respetan `BASE_URL`, por lo que funcionan tanto en `/` como en `/alon-kids/`.
+
+## PWA y modo offline
+
+El build de producción registra `public/sw.js` dentro del ámbito real de `BASE_URL`. La portada se guarda al instalar la PWA y las páginas, scripts, estilos e imágenes del mismo origen se almacenan al visitarlos. Si se pierde la conexión, una navegación intenta mostrar su versión guardada y usa la portada como fallback.
+
+El service worker no se registra durante `npm run dev`, evitando cachés persistentes mientras se desarrolla. Al cambiar su estrategia o los recursos críticos, incrementa la versión de `CACHE_NAME` en `public/sw.js`.
 
 ## Verificación
 

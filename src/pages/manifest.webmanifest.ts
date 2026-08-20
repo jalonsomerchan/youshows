@@ -6,18 +6,31 @@ export function GET() {
   const t = useTranslations(defaultLocale);
 
   const manifest = {
+    id: getBasePath(),
     name: siteConfig.name,
     short_name: siteConfig.name,
     description: t('site.description'),
     start_url: getBasePath(),
+    scope: getBasePath(),
+    lang: defaultLocale,
+    dir: 'ltr',
     display: 'standalone',
+    display_override: ['standalone', 'minimal-ui'],
     background_color: '#0b0d14',
     theme_color: '#fb315c',
+    categories: ['entertainment', 'kids'],
     icons: [
       {
-        src: withBasePath('favicon.svg'),
-        sizes: 'any',
-        type: 'image/svg+xml',
+        src: withBasePath('pwa-icon-192.png'),
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: withBasePath('pwa-icon-512.png'),
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any maskable',
       },
     ],
   };

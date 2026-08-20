@@ -14,12 +14,12 @@ export const localeFlags: Record<Locale, string> = {
 };
 
 export const siteConfig = {
-  name: 'YouShows',
-  description: 'Tus series de YouTube, ordenadas y siempre a punto para continuar.',
+  name: 'Alon Kids',
+  description: 'Las series favoritas de los peques, ordenadas y listas para continuar.',
   url: import.meta.env.ASTRO_SITE ?? 'https://jalonsomerchan.github.io',
   base: import.meta.env.ASTRO_BASE ?? '/',
   repositoryUrl:
-    import.meta.env.PUBLIC_REPOSITORY_URL ?? 'https://github.com/jalonsomerchan/youshows',
+    import.meta.env.PUBLIC_REPOSITORY_URL ?? 'https://github.com/jalonsomerchan/alon-kids',
   author: 'Jorge Alonso',
   defaultLocale,
   locales,

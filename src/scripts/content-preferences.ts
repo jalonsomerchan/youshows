@@ -5,8 +5,9 @@ import {
   type SeriesLanguage,
 } from '../config/series-metadata';
 
-export const CONTENT_PREFERENCES_STORAGE_KEY = 'youshows.content-preferences.v1';
-export const CONTENT_PREFERENCES_EVENT = 'youshows:content-preferences';
+export const CONTENT_PREFERENCES_STORAGE_KEY = 'alon-kids.content-preferences.v1';
+export const CONTENT_PREFERENCES_EVENT = 'alon-kids:content-preferences';
+const LEGACY_STORAGE_KEY = 'youshows.content-preferences.v1';
 
 export interface ContentPreferences {
   version: 1;
@@ -31,7 +32,9 @@ function readSelection<T extends string>(
 
 export function getContentPreferences(): ContentPreferences {
   try {
-    const stored = localStorage.getItem(CONTENT_PREFERENCES_STORAGE_KEY);
+    const stored =
+      localStorage.getItem(CONTENT_PREFERENCES_STORAGE_KEY) ??
+      localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!stored) return defaultPreferences();
     const parsed = JSON.parse(stored) as Partial<ContentPreferences>;
     return {

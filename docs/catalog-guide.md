@@ -1,6 +1,6 @@
 # Catálogo e importación de playlists
 
-YouShows genera todas sus páginas de forma estática desde `src/data/catalog.json`. El navegador solo recibe los metadatos necesarios y guarda la biblioteca personal en `localStorage`; ninguna clave de YouTube se publica en el frontend.
+Alon Kids genera todas sus páginas de forma estática desde `src/data/catalog.json`. El navegador solo recibe los metadatos necesarios y guarda la biblioteca personal en `localStorage`; ninguna clave de YouTube se publica en el frontend.
 
 ## Importar una playlist
 
@@ -94,4 +94,4 @@ Si se cambia un `series.id` o `episode.id`, el progreso local anterior dejará d
 
 El reproductor guarda cada cinco segundos, restaura el punto anterior y, al terminar, abre automáticamente el siguiente episodio de la temporada o serie. Estos datos pertenecen a cada navegador y dispositivo; no se sincronizan con una cuenta.
 
-Las preferencias del catálogo se guardan por separado en `youshows.content-preferences.v1`. El panel de ajustes permite elegir los idiomas y clasificaciones de edad visibles; el filtro se aplica al catálogo, la búsqueda, “Mi lista”, “Seguir viendo” y la serie destacada. Seleccionar todas las opciones equivale al comportamiento predeterminado y las preferencias se pueden restablecer desde el mismo panel.
+Las preferencias del catálogo se guardan por separado en `alon-kids.content-preferences.v1`. El panel de ajustes permite elegir los idiomas y clasificaciones de edad visibles; el filtro se aplica al catálogo, la búsqueda, “Mi lista”, “Seguir viendo” y la serie destacada. Seleccionar todas las opciones equivale al comportamiento predeterminado y las preferencias se pueden restablecer desde el mismo panel. Las claves antiguas `youshows.*` se leen como migración para conservar los datos locales existentes tras el cambio de nombre.

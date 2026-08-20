@@ -29,6 +29,9 @@ const routePath = stripBasePath(Astro.url.pathname);
 const canonicalUrl = getAbsoluteUrl(withBasePath(routePath), siteConfig.url);
 const imageUrl = getAbsoluteUrl(withBasePath(image), siteConfig.url);
 const ogLocale = locale === 'es' ? 'es_ES' : 'en_US';
+const serviceWorkerUrl = withBasePath('sw.js');
+const serviceWorkerScope = withBasePath('');
+const registerServiceWorker = import.meta.env.PROD;
 ---
 
 <!doctype html>
@@ -41,6 +44,7 @@ const ogLocale = locale === 'es' ? 'es_ES' : 'en_US';
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href={withBasePath('favicon.svg')} />
+    <link rel="apple-touch-icon" href={withBasePath('apple-touch-icon.png')} />
     <link rel="manifest" href={withBasePath('manifest.webmanifest')} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle} />
@@ -56,11 +60,20 @@ const ogLocale = locale === 'es' ? 'es_ES' : 'en_US';
     <meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)" />
     <script is:inline>
       (() => {
-        const stored = localStorage.getItem('youshows.theme');
+        const stored = localStorage.getItem('alon-kids.theme') ?? localStorage.getItem('youshows.theme');
         const preferred = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.dataset.theme = stored || preferred;
       })();
     </script>
+    {registerServiceWorker && (
+      <script is:inline define:vars={{ serviceWorkerUrl, serviceWorkerScope }}>
+        if ('serviceWorker' in navigator) {
+          addEventListener('load', () => {
+            navigator.serviceWorker.register(serviceWorkerUrl, { scope: serviceWorkerScope });
+          });
+        }
+      </script>
+    )}
   </head>
   <body class:list={{ immersive }}>
     <a class="skip-link" href="#main-content">{t('accessibility.skipContent')}</a>

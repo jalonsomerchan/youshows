@@ -5,8 +5,7 @@
       <stop offset="1" stop-color="#7c3aed" />
     </linearGradient>
   </defs>
-  <rect width="128" height="128" rx="30" fill="#0b0d14" />
-  <rect x="10" y="10" width="108" height="108" rx="24" fill="url(#brand)" />
-  <path d="M32 30h18l14 27 14-27h18L72 72v26H56V72L32 30Z" fill="#fff" />
-  <path d="m82 75 18 11-18 11V75Z" fill="#fff" opacity=".9" />
+  <rect width="128" height="128" fill="#0b0d14" />
+  <rect x="16" y="16" width="96" height="96" rx="24" fill="url(#brand)" />
+  <text x="64" y="81" fill="#fff" font-family="system-ui, sans-serif" font-size="48" font-weight="900" letter-spacing="-4" text-anchor="middle">AK</text>
 </svg>
