@@ -62,6 +62,7 @@ const nextUrl = nextEpisode ? getWatchPath(series.id, nextEpisode.id, locale) : 
 </article>
 
 <script>
+  import { keepFullscreenLandscape } from '../scripts/fullscreen-orientation';
   import { episodeKey, getLibrary, saveProgress } from '../scripts/user-library';
 
   const shell = document.querySelector<HTMLElement>('[data-player-shell]');
@@ -74,6 +75,7 @@ const nextUrl = nextEpisode ? getWatchPath(series.id, nextEpisode.id, locale) : 
     const startSeconds = saved && !saved.watched && saved.progress > 5 ? saved.progress : 0;
     let player: any;
     let nextTimer = 0;
+    const stopLandscapeLock = keepFullscreenLandscape();
 
     const saveCurrent = (watched = false) => {
       if (!player?.getCurrentTime || !player?.getDuration) return;
@@ -113,7 +115,11 @@ const nextUrl = nextEpisode ? getWatchPath(series.id, nextEpisode.id, locale) : 
       const upNext = shell.querySelector<HTMLElement>('[data-up-next]');
       if (upNext) upNext.hidden = true;
     });
-    window.addEventListener('pagehide', () => { saveCurrent(); window.clearInterval(progressTimer); }, { once: true });
+    window.addEventListener('pagehide', () => {
+      saveCurrent();
+      stopLandscapeLock();
+      window.clearInterval(progressTimer);
+    }, { once: true });
   }
 </script>
 
