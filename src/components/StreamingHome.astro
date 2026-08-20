@@ -14,6 +14,9 @@ const featuredSeries = markedAsFeatured.length > 0 ? markedAsFeatured : catalog.
 const hasFeaturedSeries = featuredSeries.length > 0;
 const railLimit = 12;
 const catalogLists = getCatalogLists(locale);
+const exploreSeries = [...catalog.series].sort(
+  (first, second) => getLatestPublishedAt(second) - getLatestPublishedAt(first)
+);
 const curatedRails = [
   {
     id: 'in-spanish',
@@ -91,7 +94,7 @@ const curatedRails = [
   <section class="content-rail" id="catalog" aria-labelledby="catalog-title">
     <div class="section-heading"><h2 id="catalog-title">{t('home.explore')}</h2><span>{t('home.exploreHint')}</span></div>
     <div class="rail" data-catalog-list>
-      {catalog.series.map((series) => <ShowCard series={series} locale={locale} />)}
+      {exploreSeries.map((series) => <ShowCard series={series} locale={locale} />)}
     </div>
     <div class="preferences-empty" data-preferences-empty hidden>
       <strong>{t('settings.emptyTitle')}</strong>
