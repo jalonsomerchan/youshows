@@ -61,6 +61,10 @@ describe('project smoke checks', () => {
       'src/scripts/user-library.ts',
       'src/scripts/content-preferences.ts',
       'src/components/ContentSettings.astro',
+      'public/sw.js',
+      'public/pwa-icon-192.png',
+      'public/pwa-icon-512.png',
+      'public/apple-touch-icon.png',
       'scripts/youtube/add-playlist.mjs',
     ].forEach((path) => {
       assert.equal(existsSync(join(root, path)), true, `${path} should exist`);
@@ -181,13 +185,36 @@ describe('project smoke checks', () => {
     assert.match(envExample, /YOUTUBE_API_KEY/);
     assert.match(header, /t\('nav\.main'\)/);
     assert.match(header, /data-settings-open/);
-    assert.match(contentPreferences, /youshows\.content-preferences\.v1/);
+    assert.match(contentPreferences, /alon-kids\.content-preferences\.v1/);
     assert.match(home, /StreamingHome/);
     assert.match(localizedHome, /StreamingHome/);
     assert.equal(existsSync(join(root, 'src/components/SeriesDetail.astro')), true);
     assert.equal(existsSync(join(root, 'src/components/YouTubePlayer.astro')), true);
     assert.equal(existsSync(join(root, 'src/pages/series/[slug].astro')), true);
     assert.equal(existsSync(join(root, 'src/pages/watch/[series]/[episode].astro')), true);
+  });
+
+  it('ships Alon Kids as an installable, subpath-safe PWA', () => {
+    const pkg = readJson('package.json');
+    const siteConfig = readText('src/config/site.ts');
+    const layout = readText('src/layouts/BaseLayout.astro');
+    const manifest = readText('src/pages/manifest.webmanifest.ts');
+    const serviceWorker = readText('public/sw.js');
+    const readme = readText('README.md');
+
+    assert.equal(pkg.name, 'alon-kids');
+    assert.match(siteConfig, /name:\s*['"]Alon Kids['"]/);
+    assert.match(readme, /^# Alon Kids/m);
+    assert.match(layout, /navigator\.serviceWorker\.register/);
+    assert.match(layout, /withBasePath\('sw\.js'\)/);
+    assert.match(layout, /apple-touch-icon/);
+    assert.match(manifest, /scope/);
+    assert.match(manifest, /display:\s*['"]standalone['"]/);
+    assert.match(manifest, /192x192/);
+    assert.match(manifest, /512x512/);
+    assert.match(serviceWorker, /CACHE_NAME/);
+    assert.match(serviceWorker, /APP_HOME/);
+    assert.match(serviceWorker, /request\.mode === ['"]navigate['"]/);
   });
 
   it('keeps catalog series, seasons and episodes structurally valid', () => {

@@ -1,4 +1,6 @@
-const STORAGE_KEY = 'youshows.library.v1';
+const STORAGE_KEY = 'alon-kids.library.v1';
+const LEGACY_STORAGE_KEY = 'youshows.library.v1';
+export const LIBRARY_EVENT = 'alon-kids:library';
 
 export interface EpisodeProgress {
   progress: number;
@@ -23,7 +25,7 @@ export function episodeKey(seriesId: string, episodeId: string) {
 
 export function getLibrary(): LibraryState {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!stored) return emptyState();
     const parsed = JSON.parse(stored) as Partial<LibraryState>;
     return {
@@ -38,7 +40,7 @@ export function getLibrary(): LibraryState {
 
 function persist(state: LibraryState) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  window.dispatchEvent(new CustomEvent('youshows:library', { detail: state }));
+  window.dispatchEvent(new CustomEvent(LIBRARY_EVENT, { detail: state }));
 }
 
 export function toggleSeries(seriesId: string): boolean {

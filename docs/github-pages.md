@@ -188,6 +188,12 @@ https://usuario.github.io/nombre-repo/sitemap-index.xml
 
 No volver a moverlo a `public/manifest.webmanifest` salvo que se resuelva bien `start_url` e iconos con `base`.
 
+## PWA y service worker
+
+`public/sw.js` se registra únicamente en builds de producción desde `BaseLayout.astro`. Tanto la URL del script como su `scope` se generan con `withBasePath`, por lo que el service worker queda limitado a `/` en dominio raíz o a la subruta del proyecto en GitHub Pages.
+
+La portada cacheada se calcula de forma relativa a la propia URL de `sw.js`; no se debe sustituir por una ruta absoluta. Si se cambia la estrategia de caché, incrementa la versión de `CACHE_NAME` para retirar de forma segura las cachés anteriores.
+
 ## Checklist antes de tocar Pages o rutas
 
 - ¿`npm run build` seguirá generando `dist/`?
