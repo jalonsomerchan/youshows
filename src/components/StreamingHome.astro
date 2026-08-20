@@ -1,0 +1,98 @@
+---
+import type { Locale } from '../config/site';
+import { catalog } from '../data/catalog';
+import { useTranslations } from '../i18n/ui';
+import FeaturedHero from './FeaturedHero.astro';
+import ShowCard from './ShowCard.astro';
+
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const featured = catalog.series.find((series) => series.featured) ?? catalog.series[0];
+---
+
+<div data-streaming-home>
+{featured ? <FeaturedHero series={featured} locale={locale} /> : null}
+
+{!featured && (
+  <section class="empty-catalog" aria-labelledby="empty-catalog-title">
+    <p>{t('home.eyebrow')}</p>
+    <h1 id="empty-catalog-title">{t('catalog.emptyTitle')}</h1>
+    <span>{t('catalog.emptyDescription')}</span>
+  </section>
+)}
+
+<div class:list={['home-content', { 'home-content--empty': !featured }]} data-home-content>
+  <section class="search-section" id="search" aria-labelledby="search-title">
+    <label id="search-title" for="catalog-search">{t('search.label')}</label>
+    <div class="search-field">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" /></svg>
+      <input id="catalog-search" type="search" inputmode="search" placeholder={t('search.placeholder')} autocomplete="off" />
+    </div>
+    <p class="search-empty" data-search-empty hidden>{t('search.empty')}</p>
+    <div class="search-results" data-search-results hidden>
+      {catalog.series.map((series) => <ShowCard series={series} locale={locale} class="search-card" />)}
+    </div>
+  </section>
+
+  <section class="content-rail" data-continue-section hidden aria-labelledby="continue-title">
+    <div class="section-heading"><h2 id="continue-title">{t('home.continueWatching')}</h2></div>
+    <div class="rail" data-continue-list>
+      {catalog.series.map((series) => <ShowCard series={series} locale={locale} class="continue-card" />)}
+    </div>
+  </section>
+
+  <section class="content-rail" id="my-list" data-library-section hidden aria-labelledby="library-title">
+    <div class="section-heading"><h2 id="library-title">{t('home.myList')}</h2><span>{t('library.savedLocally')}</span></div>
+    <div class="rail" data-library-list>
+      {catalog.series.map((series) => <ShowCard series={series} locale={locale} class="library-card" />)}
+    </div>
+  </section>
+
+  <section class="content-rail" id="catalog" aria-labelledby="catalog-title">
+    <div class="section-heading"><h2 id="catalog-title">{t('home.explore')}</h2><span>{t('home.exploreHint')}</span></div>
+    <div class="rail" data-catalog-list>
+      {catalog.series.map((series) => <ShowCard series={series} locale={locale} />)}
+    </div>
+    <div class="preferences-empty" data-preferences-empty hidden>
+      <strong>{t('settings.emptyTitle')}</strong>
+      <span>{t('settings.emptyDescription')}</span>
+      <button class="button button--soft" type="button" data-settings-open>{t('settings.adjust')}</button>
+    </div>
+  </section>
+</div>
+</div>
+
+<script>
+  import '../scripts/streaming-home';
+</script>
+
+<style>
+  .home-content { position: relative; z-index: 1; width: min(100%, 96rem); margin: -1.5rem auto 0; padding: 0 1rem 7rem; }
+  .home-content--empty, .home-content--no-hero { margin-top: 0; padding-top: 6rem; }
+  .empty-catalog { width: min(100% - 2rem, 48rem); margin: 6rem auto 0; padding: 2rem; border: 1px solid var(--color-border); border-radius: var(--radius-xl); background: var(--color-surface); text-align: center; box-shadow: var(--shadow-md); }
+  .empty-catalog p { margin: 0 0 .6rem; color: var(--color-primary); font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .empty-catalog h1 { margin: 0; font-size: clamp(2rem, 9vw, 3.5rem); letter-spacing: -.055em; line-height: 1; }
+  .empty-catalog span { display: block; max-width: 36rem; margin: 1rem auto 0; color: var(--color-text-muted); }
+  .content-rail { margin-top: 2.25rem; }
+  .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: .8rem; }
+  .section-heading h2 { margin: 0; font-size: clamp(1.25rem, 4vw, 1.75rem); letter-spacing: -.03em; }
+  .section-heading span { display: none; color: var(--color-text-soft); font-size: .8rem; }
+  .rail, .search-results { display: flex; gap: .85rem; margin-inline: -1rem; padding: .35rem 1rem 1.25rem; overflow-x: auto; overscroll-behavior-inline: contain; scroll-padding-inline: 1rem; scroll-snap-type: inline proximity; scrollbar-width: none; }
+  .rail::-webkit-scrollbar { display: none; }
+  .search-section { scroll-margin-top: 5rem; }
+  .search-section > label { display: block; margin-bottom: .55rem; font-size: .85rem; font-weight: 750; }
+  .search-field { position: relative; }
+  .search-field svg { position: absolute; top: 50%; left: 1rem; width: 1.15rem; transform: translateY(-50%); fill: none; stroke: var(--color-text-soft); stroke-linecap: round; stroke-width: 2; }
+  .search-field input { width: 100%; min-height: 3rem; border: 1px solid var(--color-border); border-radius: var(--radius-full); padding: .75rem 1rem .75rem 2.8rem; background: color-mix(in srgb, var(--color-surface), transparent 8%); color: var(--color-text); font: inherit; box-shadow: var(--shadow-xs); }
+  .search-field input:focus { border-color: var(--color-primary); outline: 3px solid var(--color-primary-soft); }
+  .search-results { margin-top: .75rem; }
+  .search-empty { margin: 1rem 0 0; color: var(--color-text-muted); }
+  .preferences-empty { display: grid; justify-items: start; gap: .45rem; border: 1px dashed var(--color-border-strong); border-radius: var(--radius-xl); padding: 1.25rem; background: var(--color-surface); }
+  .preferences-empty strong { font-size: 1.05rem; }
+  .preferences-empty span { color: var(--color-text-muted); font-size: .9rem; }
+  .preferences-empty .button { margin-top: .35rem; }
+  [hidden] { display: none !important; }
+  @media (min-width: 640px) { .home-content { margin-top: -2.25rem; padding-inline: 2rem; } .rail, .search-results { margin-inline: -2rem; padding-inline: 2rem; } .section-heading span { display: inline; } }
+  @media (min-width: 1024px) { .home-content { padding-inline: 3rem; } .rail, .search-results { margin-inline: -3rem; padding-inline: 3rem; } }
+</style>

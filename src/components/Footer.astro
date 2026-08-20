@@ -1,18 +1,20 @@
 ---
-import Container from './Container.astro';
 import { siteConfig, type Locale } from '../config/site';
 import { useTranslations } from '../i18n/ui';
 
-interface Props {
-  locale: Locale;
-}
-
+interface Props { locale: Locale; }
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 ---
 
-<footer class="border-t border-[var(--color-border)]">
-  <Container class="py-6 text-sm text-[var(--color-muted)]">
-    <p>© {new Date().getFullYear()} {siteConfig.name}. {t('footer.createdWith')}</p>
-  </Container>
+<footer class="site-footer">
+  <div><strong>{siteConfig.name}</strong><p>{t('footer.tagline')}</p></div>
+  <p>© {new Date().getFullYear()} {siteConfig.name}. {t('footer.createdWith')}</p>
 </footer>
+
+<style>
+  .site-footer { display: flex; width: min(100% - 2rem, 90rem); flex-direction: column; gap: 1.25rem; margin-inline: auto; border-top: 1px solid var(--color-border); padding: 2rem 0 7rem; color: var(--color-text-soft); font-size: .78rem; }
+  .site-footer strong { color: var(--color-text); font-size: 1rem; }
+  .site-footer p { margin: .2rem 0 0; }
+  @media (min-width: 768px) { .site-footer { flex-direction: row; align-items: end; justify-content: space-between; padding: 2.5rem 0; } }
+</style>

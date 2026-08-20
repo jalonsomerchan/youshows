@@ -51,10 +51,17 @@ describe('project smoke checks', () => {
       'src/pages/robots.txt.ts',
       'src/layouts/BaseLayout.astro',
       'src/config/site.ts',
+      'src/config/series-metadata.ts',
       'src/i18n/ui.ts',
       'src/i18n/translations',
       'src/utils/paths.ts',
       'src/styles/global.css',
+      'src/data/catalog.json',
+      'src/data/catalog.ts',
+      'src/scripts/user-library.ts',
+      'src/scripts/content-preferences.ts',
+      'src/components/ContentSettings.astro',
+      'scripts/youtube/add-playlist.mjs',
     ].forEach((path) => {
       assert.equal(existsSync(join(root, path)), true, `${path} should exist`);
     });
@@ -76,6 +83,7 @@ describe('project smoke checks', () => {
     assert.equal(pkg.scripts?.preview, 'astro preview');
     assert.ok(pkg.scripts?.test?.includes('node --test'));
     assert.ok(pkg.scripts?.clean?.includes('scripts/clean.mjs'));
+    assert.ok(pkg.scripts?.['playlist:add']?.includes('scripts/youtube/add-playlist.mjs'));
   });
 
   it('keeps basic template components available', () => {
@@ -153,26 +161,59 @@ describe('project smoke checks', () => {
     });
 
     assert.match(pathHelpers, /withBasePath/);
+    assert.match(pathHelpers, /isFilePath/);
     assert.match(pathHelpers, /stripBasePath/);
     assert.match(pathHelpers, /getAbsoluteUrl/);
     assert.match(manifest, /start_url/);
     assert.match(robots, /sitemap-index\.xml/);
   });
 
-  it('keeps starter links and labels configurable or translated', () => {
+  it('keeps the streaming experience modular and translated', () => {
     const siteConfig = readText('src/config/site.ts');
     const header = readText('src/components/Header.astro');
     const home = readText('src/pages/index.astro');
     const localizedHome = readText('src/pages/[locale]/index.astro');
     const envExample = readText('.env.example');
+    const contentPreferences = readText('src/scripts/content-preferences.ts');
 
     assert.match(siteConfig, /repositoryUrl/);
     assert.match(envExample, /PUBLIC_REPOSITORY_URL/);
+    assert.match(envExample, /YOUTUBE_API_KEY/);
     assert.match(header, /t\('nav\.main'\)/);
-    assert.match(home, /siteConfig\.repositoryUrl/);
-    assert.match(localizedHome, /siteConfig\.repositoryUrl/);
-    assert.doesNotMatch(home, /https:\/\/github\.com\/jalonsomerchan\/astro-template/);
-    assert.doesNotMatch(localizedHome, /https:\/\/github\.com\/jalonsomerchan\/astro-template/);
+    assert.match(header, /data-settings-open/);
+    assert.match(contentPreferences, /youshows\.content-preferences\.v1/);
+    assert.match(home, /StreamingHome/);
+    assert.match(localizedHome, /StreamingHome/);
+    assert.equal(existsSync(join(root, 'src/components/SeriesDetail.astro')), true);
+    assert.equal(existsSync(join(root, 'src/components/YouTubePlayer.astro')), true);
+    assert.equal(existsSync(join(root, 'src/pages/series/[slug].astro')), true);
+    assert.equal(existsSync(join(root, 'src/pages/watch/[series]/[episode].astro')), true);
+  });
+
+  it('keeps catalog series, seasons and episodes structurally valid', () => {
+    const catalog = readJson('src/data/catalog.json');
+    assert.equal(catalog.version, 1);
+    assert.ok(Array.isArray(catalog.series));
+    catalog.series.forEach((series) => {
+      assert.match(series.id, /^[a-z0-9-]+$/);
+      assert.ok(Array.isArray(series.tags));
+      assert.ok(
+        ['none', 'es', 'ca', 'en', 'eu', 'gl', 'fr', 'pt', 'it', 'de', 'ja', 'other'].includes(
+          series.language
+        )
+      );
+      assert.ok(['none', 'all', '3', '7', '12', '16', '18'].includes(series.ageRating));
+      assert.equal(typeof series.description, 'string');
+      assert.ok(Array.isArray(series.seasons) && series.seasons.length > 0);
+      series.seasons.forEach((season) => {
+        assert.ok(Number.isInteger(season.number));
+        assert.ok(Array.isArray(season.episodes));
+        season.episodes.forEach((episode) => {
+          assert.ok(episode.youtubeId);
+          assert.equal(episode.season, season.number);
+        });
+      });
+    });
   });
 
   it('includes GitHub workflows for CI and Pages', () => {
@@ -192,6 +233,10 @@ describe('project smoke checks', () => {
 
     assert.match(readme, /\S/, 'README.md should not be empty');
     assert.equal(existsSync(join(root, 'agents.md')), true, 'agents.md should exist');
-    assert.equal(existsSync(join(root, 'docs/design-system.md')), true, 'docs/design-system.md should exist');
+    assert.equal(
+      existsSync(join(root, 'docs/design-system.md')),
+      true,
+      'docs/design-system.md should exist'
+    );
   });
 });

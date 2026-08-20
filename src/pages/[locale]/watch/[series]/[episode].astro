@@ -1,0 +1,23 @@
+---
+import YouTubePlayer from '../../../../components/YouTubePlayer.astro';
+import { defaultLocale, locales, type Locale } from '../../../../config/site';
+import { catalog, getEpisodes, getNextEpisode, type Episode, type Series } from '../../../../data/catalog';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+
+export function getStaticPaths() {
+  return locales.filter((locale) => locale !== defaultLocale).flatMap((locale) =>
+    catalog.series.flatMap((series) =>
+      getEpisodes(series).map((episode) => ({
+        params: { locale, series: series.id, episode: episode.id },
+        props: { locale, series, episode, nextEpisode: getNextEpisode(series, episode.id) },
+      }))
+    )
+  );
+}
+
+const { locale, series, episode, nextEpisode } = Astro.props as { locale: Locale; series: Series; episode: Episode; nextEpisode?: Episode };
+---
+
+<BaseLayout title={episode.title} description={episode.description} locale={locale} immersive>
+  <YouTubePlayer series={series} episode={episode} nextEpisode={nextEpisode} locale={locale} />
+</BaseLayout>

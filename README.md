@@ -1,261 +1,132 @@
-# Astro Template
+# YouShows
 
-Plantilla base para crear proyectos con Astro sin repetir configuración inicial.
+Experiencia de streaming estática construida con Astro para convertir playlists de YouTube en series con temporadas, episodios y reproducción continua. Está diseñada mobile first, funciona en modo claro y oscuro y no necesita backend para el catálogo ni para guardar la actividad del usuario.
 
-Incluye:
+## Funcionalidades
 
-- Astro 6
-- Tailwind CSS 4
-- MDX
-- Sitemap
-- i18n nativo de Astro
-- Traducciones mediante JSON por idioma
-- Layout base
-- Componentes mínimos reutilizables
-- SEO técnico básico
-- Página 404
-- `robots.txt` dinámico
-- Manifest web dinámico
-- Imagen social por defecto
-- Tests smoke con `node:test`
-- CI en pull requests
-- Despliegue automático en GitHub Pages
-- Dependabot para npm y GitHub Actions
-- Documentación específica para agentes IA
+- Portada tipo plataforma de streaming con contenido destacado, buscador y carruseles táctiles.
+- Ficha de cada serie con selector de temporadas y lista de episodios.
+- Reproductor basado en la YouTube IFrame API con salto automático al siguiente episodio.
+- “Mi lista”, progreso, capítulo pendiente y episodios vistos guardados en `localStorage`.
+- Playlist Studio local para importar playlists y editar o eliminar series y capítulos, también de forma masiva, con idioma, edad recomendada, descripción y tags.
+- Detección automática de patrones de temporada/capítulo en español e inglés.
+- Omisión automática de vídeos privados o que no permiten reproducción embebida.
+- Rutas estáticas en español (`/`) e inglés (`/en/`).
+- Compatibilidad con dominio raíz, subruta y GitHub Pages.
+- SEO técnico, sitemap, manifest, robots y tests smoke.
 
 ## Requisitos
 
-Usa Node 22. El repositorio incluye `.nvmrc`.
+- Node.js 22 (consulta `.nvmrc`).
+- Una clave de YouTube Data API v3 solo para importar playlists. No es necesaria para servir o reproducir el sitio.
 
 ```sh
 nvm use
 npm ci
+npm run dev
 ```
 
 ## Comandos
 
-| Comando | Acción |
-| --- | --- |
-| `npm run dev` | Arranca el servidor local de Astro |
-| `npm run build` | Genera la web estática en `dist/` |
-| `npm run preview` | Previsualiza el build localmente |
-| `npm test` | Ejecuta tests smoke básicos |
-| `npm run format` | Formatea CSS, JS, JSON, Markdown, TS y YAML |
-| `npm run format:check` | Comprueba formato |
-| `npm run clean` | Borra `dist` y `.astro` |
+| Comando                       | Acción                                           |
+| ----------------------------- | ------------------------------------------------ |
+| `npm run dev`                 | Inicia Astro en desarrollo.                      |
+| `npm run build`               | Genera la web estática en `dist/`.               |
+| `npm run preview`             | Sirve el build local.                            |
+| `npm test`                    | Ejecuta tests smoke y del detector de episodios. |
+| `npm run playlist:ui`         | Inicia el administrador visual local.            |
+| `npm run playlist:add -- URL` | Importa o actualiza una playlist.                |
+| `npm run format`              | Formatea los ficheros compatibles.               |
+| `npm run clean`               | Borra `dist` y `.astro`.                         |
 
-## Estructura recomendada
+## Añadir una serie desde YouTube
 
-```text
-/
-├── .github/
-│   ├── dependabot.yml
-│   └── workflows/
-│       ├── ci.yml
-│       └── pages.yml
-├── docs/
-│   ├── ai-checklist.md
-│   ├── design-system.md
-│   ├── github-pages.md
-│   ├── i18n-guide.md
-│   ├── template-usage.md
-│   └── testing-guide.md
-├── public/
-│   ├── favicon.svg
-│   ├── favicon.ico
-│   └── og-image.svg
-├── scripts/
-│   └── clean.mjs
-├── src/
-│   ├── components/
-│   │   ├── Button.astro
-│   │   ├── Container.astro
-│   │   ├── Footer.astro
-│   │   └── Header.astro
-│   ├── config/
-│   │   └── site.ts
-│   ├── i18n/
-│   │   ├── translations/
-│   │   │   ├── en.json
-│   │   │   └── es.json
-│   │   └── ui.ts
-│   ├── layouts/
-│   │   └── BaseLayout.astro
-│   ├── pages/
-│   │   ├── [locale]/
-│   │   │   └── index.astro
-│   │   ├── 404.astro
-│   │   ├── index.astro
-│   │   ├── manifest.webmanifest.ts
-│   │   └── robots.txt.ts
-│   └── styles/
-│       └── global.css
-└── tests/
-    └── smoke.test.mjs
+La opción más cómoda es arrancar la interfaz local y abrir la dirección que muestra:
+
+```sh
+npm run playlist:ui
 ```
 
-## Documentación para agentes IA
+La interfaz está en `.local/playlist-admin/` y Git la ignora, por lo que no se publica junto a la web. Desde ella también puedes modificar el idioma, la edad recomendada, la descripción, los tags y el resto de metadatos; filtrar y seleccionar episodios; renumerar o mover temporadas; y hacer eliminaciones masivas.
 
-Antes de modificar el template, una IA debe leer:
+También puedes exportar la clave en tu terminal y ejecutar el importador:
 
-- `agents.md`: reglas principales del repositorio.
-- `docs/ai-checklist.md`: checklist rápida antes de cerrar tareas.
-- `docs/template-usage.md`: cómo usar y modificar la plantilla.
-- `docs/i18n-guide.md`: cómo añadir textos, traducciones e idiomas.
-- `docs/github-pages.md`: cómo evitar romper GitHub Pages y `base`.
-- `docs/testing-guide.md`: cómo mantener tests smoke.
-- `docs/design-system.md`: reglas visuales, SEO, accesibilidad y responsive.
+```sh
+export YOUTUBE_API_KEY="tu-clave"
+npm run playlist:add -- "https://www.youtube.com/playlist?list=PLAYLIST_ID" \
+  --title "Título de la serie" \
+  --genres "Documental,Tecnología" \
+  --featured true
+```
 
-## Crear un proyecto nuevo desde esta plantilla
+El resultado se escribe en `src/data/catalog.json`. El importador entiende títulos como `S02E04`, `2x04`, `Temporada 2 Capítulo 4` y `Season 2 Episode 4`. Consulta [docs/catalog-guide.md](docs/catalog-guide.md) para ver todas las opciones, el modelo de datos y las reglas de identificación.
 
-1. Usa este repositorio como template o clónalo.
-2. Cambia `name` en `package.json`.
-3. Cambia los datos de `src/config/site.ts`.
-4. Cambia los textos en `src/i18n/translations/*.json`.
-5. Cambia `public/favicon.svg`, `public/favicon.ico` y `public/og-image.svg`.
-6. Revisa `src/pages/manifest.webmanifest.ts` si quieres cambiar color, iconos o modo de visualización.
-7. Revisa `.env.example` si necesitas sobrescribir `ASTRO_SITE` o `ASTRO_BASE`.
-8. Ejecuta `npm ci`, `npm test` y `npm run build`.
-9. Activa GitHub Pages en el repositorio usando GitHub Actions como fuente.
+## Estructura principal
+
+```text
+src/
+├── components/
+│   ├── StreamingHome.astro
+│   ├── SeriesDetail.astro
+│   ├── YouTubePlayer.astro
+│   ├── ShowCard.astro
+│   └── EpisodeCard.astro
+├── data/
+│   ├── catalog.json
+│   └── catalog.ts
+├── scripts/
+│   └── user-library.ts
+├── pages/
+│   ├── series/[slug].astro
+│   ├── watch/[series]/[episode].astro
+│   └── [locale]/...
+└── i18n/translations/
+    ├── es.json
+    └── en.json
+
+scripts/youtube/
+├── add-playlist.mjs
+├── parse-title.mjs
+└── youtube-api.mjs
+```
+
+## Persistencia y privacidad
+
+Las series guardadas, los segundos reproducidos y los episodios vistos permanecen únicamente en el `localStorage` del navegador. No hay cuenta ni sincronización entre dispositivos. Playlist Studio también conserva la clave de YouTube en el `localStorage` de su origen local para reutilizarla; solo la envía al importador local y nunca debe exponerse con un prefijo `PUBLIC_` ni incluirse en el build público.
 
 ## Traducciones e idiomas
 
-La plantilla usa el i18n nativo de Astro en `astro.config.mjs` y una capa sencilla de traducciones en JSON.
+La interfaz usa el i18n nativo de Astro y los JSON de `src/i18n/translations/`. Cualquier clave de UI nueva debe añadirse en todos los idiomas configurados en `src/config/site.ts`.
 
-Idioma por defecto:
+El contenido importado conserva el título y la descripción de YouTube. Si se necesitan metadatos editoriales distintos por idioma, se pueden editar manualmente en el catálogo o mantener series específicas por idioma.
 
-```txt
-/
-```
+## GitHub Pages y subrutas
 
-Otros idiomas:
-
-```txt
-/en/
-/fr/
-...
-```
-
-### Añadir una nueva traducción
-
-Añade la clave en todos los JSON dentro de:
-
-```txt
-src/i18n/translations/
-```
-
-Ejemplo:
-
-```json
-{
-  "home.title": "Título traducido"
-}
-```
-
-Después úsala en cualquier componente o página:
-
-```astro
----
-import { useTranslations } from '../i18n/ui';
-const t = useTranslations(locale);
----
-
-<h1>{t('home.title')}</h1>
-```
-
-### Añadir un nuevo idioma
-
-Ejemplo para añadir francés:
-
-1. Añade el idioma en `astro.config.mjs`:
-
-```js
-i18n: {
-  defaultLocale: 'es',
-  locales: ['es', 'en', 'fr'],
-  routing: {
-    prefixDefaultLocale: false,
-  },
-}
-```
-
-2. Añade el idioma en `src/config/site.ts`:
-
-```ts
-export const locales = ['es', 'en', 'fr'] as const;
-
-export const localeLabels = {
-  es: 'Español',
-  en: 'English',
-  fr: 'Français',
-};
-```
-
-3. Crea el fichero:
-
-```txt
-src/i18n/translations/fr.json
-```
-
-4. Importa y registra el JSON en `src/i18n/ui.ts`:
-
-```ts
-import fr from './translations/fr.json';
-
-const translations = {
-  es,
-  en,
-  fr,
-};
-```
-
-Con eso se generará `/fr/` usando `src/pages/[locale]/index.astro`.
-
-## GitHub Pages
-
-El despliegue está en `.github/workflows/pages.yml`.
-
-Por defecto, cuando corre en GitHub Actions, `astro.config.mjs` calcula automáticamente:
-
-- `site`: `https://OWNER.github.io`
-- `base`: `/NOMBRE_DEL_REPO`
-
-Puedes sobrescribirlo con variables de entorno:
-
-```env
-ASTRO_SITE=https://example.com
-ASTRO_BASE=/
-```
-
-Para un dominio propio normalmente usarías:
-
-```env
-ASTRO_SITE=https://example.com
-ASTRO_BASE=/
-```
-
-## CI
-
-`.github/workflows/ci.yml` ejecuta en pull requests:
+La configuración calcula `base` automáticamente en GitHub Actions. También se puede comprobar localmente:
 
 ```sh
-npm ci
+ASTRO_SITE=https://usuario.github.io ASTRO_BASE=/youshows npm run build
+```
+
+Los enlaces internos usan helpers localizados y respetan `BASE_URL`, por lo que funcionan tanto en `/` como en `/youshows/`.
+
+## Verificación
+
+Antes de desplegar:
+
+```sh
 npm test
 npm run build
 ```
 
-Los tests son intencionadamente suaves: comprueban que la estructura mínima existe, que los scripts básicos están disponibles y que los workflows no desaparecen.
+La CI y el workflow de GitHub Pages ejecutan ambos comandos.
 
-## Configuración principal
+## Documentación para agentes IA
 
-La configuración editable del sitio está en:
+Antes de modificar el proyecto, lee `agents.md` y las guías de `docs/`, especialmente:
 
-```ts
-src/config/site.ts
-```
-
-Ahí puedes cambiar nombre, descripción, idiomas, autor y URL base del proyecto.
-
-## Notas
-
-Esta plantilla intenta ser útil sin ser pesada. Evita añadir dependencias de desarrollo obligatorias para que los proyectos derivados arranquen rápido y no fallen por configuración innecesaria.
+- `docs/catalog-guide.md` para catálogo, importación y progreso.
+- `docs/design-system.md` para UI, responsive, accesibilidad y temas.
+- `docs/i18n-guide.md` para traducciones.
+- `docs/github-pages.md` para rutas y despliegues en subcarpeta.
+- `docs/testing-guide.md` para mantener tests smoke útiles.

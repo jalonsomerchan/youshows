@@ -1,0 +1,44 @@
+---
+import type { Locale } from '../config/site';
+import type { Episode, Series } from '../data/catalog';
+import { useTranslations } from '../i18n/ui';
+import { getWatchPath } from '../utils/streaming-paths';
+
+interface Props { series: Series; episode: Episode; locale: Locale; }
+const { series, episode, locale } = Astro.props;
+const t = useTranslations(locale);
+const minutes = Math.max(1, Math.round(episode.durationSeconds / 60));
+---
+
+<article class="episode" data-episode-card data-episode-id={episode.id} data-series-id={series.id}>
+  <a class="episode__media" href={getWatchPath(series.id, episode.id, locale)} aria-label={`${t('player.playEpisode')} ${episode.episode}: ${episode.title}`}>
+    <img src={episode.thumbnail} width="320" height="180" loading="lazy" decoding="async" alt="" />
+    <span class="episode__play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 7 8 5-8 5Z" /></svg></span>
+    <span class="episode__progress" data-episode-progress hidden><span></span></span>
+  </a>
+  <div class="episode__body">
+    <div class="episode__heading">
+      <h3><span>{episode.episode}.</span> {episode.title}</h3>
+      <span>{minutes} {t('catalog.minutes')}</span>
+    </div>
+    <p>{episode.description}</p>
+    <span class="episode__watched" data-watched-label hidden>✓ {t('library.watched')}</span>
+  </div>
+</article>
+
+<style>
+  .episode { display: grid; grid-template-columns: 7.75rem 1fr; gap: .85rem; padding: .85rem 0; border-bottom: 1px solid var(--color-border); }
+  .episode__media { position: relative; align-self: start; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-md); background: var(--color-surface-soft); }
+  .episode__media img { width: 100%; height: 100%; object-fit: cover; }
+  .episode__play { position: absolute; inset: 50% auto auto 50%; display: grid; width: 2rem; height: 2rem; place-items: center; transform: translate(-50%, -50%); border: 1px solid rgb(255 255 255 / .7); border-radius: 50%; background: rgb(0 0 0 / .55); color: white; }
+  .episode__play svg { width: 1.2rem; fill: currentColor; }
+  .episode__progress { position: absolute; inset: auto 0 0; height: 3px; background: rgb(255 255 255 / .3); }
+  .episode__progress span { display: block; width: var(--progress, 0%); height: 100%; background: var(--color-primary); }
+  .episode__body { min-width: 0; }
+  .episode__heading { display: flex; align-items: start; justify-content: space-between; gap: .5rem; }
+  .episode h3 { margin: 0; font-size: .9rem; line-height: 1.3; }
+  .episode__heading > span { flex: none; color: var(--color-text-soft); font-size: .72rem; }
+  .episode p { display: -webkit-box; margin: .35rem 0 0; overflow: hidden; color: var(--color-text-muted); font-size: .78rem; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .episode__watched { display: inline-block; margin-top: .35rem; color: var(--color-success); font-size: .72rem; font-weight: 700; }
+  @media (min-width: 640px) { .episode { grid-template-columns: 12rem 1fr; padding: 1rem; border: 1px solid transparent; border-radius: var(--radius-lg); } .episode:hover { border-color: var(--color-border); background: var(--color-surface-soft); } .episode h3 { font-size: 1rem; } .episode p { font-size: .875rem; -webkit-line-clamp: 3; } }
+</style>

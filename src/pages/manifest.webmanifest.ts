@@ -11,8 +11,8 @@ export function GET() {
     description: t('site.description'),
     start_url: getBasePath(),
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#2563eb',
+    background_color: '#0b0d14',
+    theme_color: '#fb315c',
     icons: [
       {
         src: withBasePath('favicon.svg'),

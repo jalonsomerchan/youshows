@@ -24,3 +24,7 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Local-only playlist administration interface
+.local/playlist-admin/
+src/data/*.playlist-ui.tmp

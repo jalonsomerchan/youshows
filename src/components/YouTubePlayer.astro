@@ -1,0 +1,156 @@
+---
+import type { Locale } from '../config/site';
+import { getEpisodes, type Episode, type Series } from '../data/catalog';
+import { useTranslations } from '../i18n/ui';
+import { getSeriesPath, getWatchPath } from '../utils/streaming-paths';
+
+interface Props { series: Series; episode: Episode; nextEpisode?: Episode; locale: Locale; }
+const { series, episode, nextEpisode, locale } = Astro.props;
+const t = useTranslations(locale);
+const episodes = getEpisodes(series);
+const nextUrl = nextEpisode ? getWatchPath(series.id, nextEpisode.id, locale) : '';
+---
+
+<article
+  class="watch"
+  data-player-shell
+  data-series-id={series.id}
+  data-episode-id={episode.id}
+  data-youtube-id={episode.youtubeId}
+  data-next-url={nextUrl}
+>
+  <header class="watch__header">
+    <a href={getSeriesPath(series.id, locale)} aria-label={`${t('nav.backTo')} ${series.title}`}>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></svg>
+    </a>
+    <div><span>{series.title}</span><strong>{t('catalog.season')} {episode.season} · {t('catalog.episode')} {episode.episode}</strong></div>
+  </header>
+
+  <div class="watch__layout">
+    <section class="player-stage" aria-labelledby="episode-title">
+      <div class="player-frame"><div id="youtube-player"></div></div>
+      <div class="up-next" data-up-next hidden role="status" aria-live="polite">
+        {nextEpisode ? (
+          <><span>{t('player.upNext')}</span><strong>{nextEpisode.title}</strong><a href={nextUrl}>{t('player.playNow')}</a><button type="button" data-cancel-next>{t('player.cancel')}</button></>
+        ) : (
+          <><strong>{t('player.seriesFinished')}</strong><a href={getSeriesPath(series.id, locale)}>{t('nav.backToSeries')}</a></>
+        )}
+      </div>
+      <noscript><p class="player-error">{t('player.javascriptRequired')}</p></noscript>
+      <div class="episode-info">
+        <p>{t('catalog.episode')} {episode.episode}</p>
+        <h1 id="episode-title">{episode.title}</h1>
+        <p>{episode.description}</p>
+        {nextEpisode && <a class="next-link" href={nextUrl}>{t('player.nextEpisode')}<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg></a>}
+      </div>
+    </section>
+
+    <aside class="queue" aria-labelledby="queue-title">
+      <div class="queue__heading"><p>{t('player.nowWatching')}</p><h2 id="queue-title">{t('player.episodeList')}</h2></div>
+      <ol>
+        {episodes.map((item) => (
+          <li class:list={{ current: item.id === episode.id }}>
+            <a href={getWatchPath(series.id, item.id, locale)} aria-current={item.id === episode.id ? 'page' : undefined}>
+              <img src={item.thumbnail} width="128" height="72" loading="lazy" decoding="async" alt="" />
+              <span><small>{t('catalog.seasonShort')}{item.season} {t('catalog.episodeShort')}{item.episode}</small><strong>{item.title}</strong></span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </aside>
+  </div>
+</article>
+
+<script>
+  import { episodeKey, getLibrary, saveProgress } from '../scripts/user-library';
+
+  const shell = document.querySelector<HTMLElement>('[data-player-shell]');
+  if (shell) {
+    const seriesId = shell.dataset.seriesId ?? '';
+    const episodeId = shell.dataset.episodeId ?? '';
+    const youtubeId = shell.dataset.youtubeId ?? '';
+    const nextUrl = shell.dataset.nextUrl ?? '';
+    const saved = getLibrary().episodes[episodeKey(seriesId, episodeId)];
+    const startSeconds = saved && !saved.watched && saved.progress > 5 ? saved.progress : 0;
+    let player: any;
+    let nextTimer = 0;
+
+    const saveCurrent = (watched = false) => {
+      if (!player?.getCurrentTime || !player?.getDuration) return;
+      saveProgress(seriesId, episodeId, player.getCurrentTime(), player.getDuration(), watched);
+    };
+
+    const loadPlayer = () => {
+      const YT = (window as any).YT;
+      player = new YT.Player('youtube-player', {
+        host: 'https://www.youtube-nocookie.com',
+        videoId: youtubeId,
+        playerVars: { autoplay: 1, playsinline: 1, rel: 0, modestbranding: 1, start: Math.floor(startSeconds) },
+        events: {
+          onStateChange: (event: any) => {
+            if (event.data !== YT.PlayerState.ENDED) return;
+            saveCurrent(true);
+            const upNext = shell.querySelector<HTMLElement>('[data-up-next]');
+            if (upNext) upNext.hidden = false;
+            if (nextUrl) nextTimer = window.setTimeout(() => window.location.assign(nextUrl), 4500);
+          },
+        },
+      });
+    };
+
+    (window as any).onYouTubeIframeAPIReady = loadPlayer;
+    if ((window as any).YT?.Player) loadPlayer();
+    else {
+      const api = document.createElement('script');
+      api.src = 'https://www.youtube.com/iframe_api';
+      api.async = true;
+      document.head.append(api);
+    }
+
+    const progressTimer = window.setInterval(() => saveCurrent(), 5000);
+    shell.querySelector('[data-cancel-next]')?.addEventListener('click', () => {
+      window.clearTimeout(nextTimer);
+      const upNext = shell.querySelector<HTMLElement>('[data-up-next]');
+      if (upNext) upNext.hidden = true;
+    });
+    window.addEventListener('pagehide', () => { saveCurrent(); window.clearInterval(progressTimer); }, { once: true });
+  }
+</script>
+
+<style>
+  .watch { min-height: 100svh; background: var(--color-bg); }
+  .watch__header { display: flex; min-height: 4rem; align-items: center; gap: .75rem; padding: .6rem 1rem; border-bottom: 1px solid var(--color-border); background: var(--color-surface); }
+  .watch__header > a { display: grid; width: 2.7rem; height: 2.7rem; flex: none; place-items: center; border-radius: 50%; text-decoration: none; }
+  .watch__header > a:hover { background: var(--color-surface-soft); }
+  .watch__header svg { width: 1.45rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+  .watch__header div { display: grid; min-width: 0; }
+  .watch__header span, .watch__header strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .watch__header span { color: var(--color-text-soft); font-size: .72rem; }
+  .watch__header strong { font-size: .85rem; }
+  .player-stage { position: relative; min-width: 0; }
+  .player-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #000; }
+  .player-frame :global(iframe), .player-frame :global(#youtube-player) { width: 100%; height: 100%; }
+  .up-next { position: absolute; z-index: 2; top: clamp(1rem, 5vw, 2rem); right: 1rem; display: grid; width: min(17rem, calc(100% - 2rem)); gap: .4rem; border: 1px solid rgb(255 255 255 / .18); border-radius: var(--radius-lg); padding: 1rem; background: rgb(8 10 16 / .92); color: white; box-shadow: var(--shadow-lg); }
+  .up-next span { color: #a9b1c5; font-size: .7rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .up-next a, .up-next button { min-height: 2.3rem; border: 0; border-radius: var(--radius-md); padding: .55rem .8rem; font: inherit; font-size: .8rem; font-weight: 750; text-align: center; text-decoration: none; cursor: pointer; }
+  .up-next a { background: white; color: #080a10; }
+  .up-next button { background: transparent; color: #d5d9e3; }
+  .episode-info { padding: 1.25rem 1rem 2rem; }
+  .episode-info > p:first-child, .queue__heading p { margin: 0 0 .35rem; color: var(--color-primary); font-size: .7rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+  .episode-info h1 { margin: 0; font-size: clamp(1.45rem, 6vw, 2.2rem); letter-spacing: -.035em; }
+  .episode-info h1 + p { margin: .65rem 0 0; color: var(--color-text-muted); line-height: 1.55; }
+  .next-link { display: inline-flex; align-items: center; gap: .3rem; margin-top: 1rem; color: var(--color-primary); font-size: .88rem; font-weight: 750; text-decoration: none; }
+  .next-link svg { width: 1rem; fill: none; stroke: currentColor; stroke-width: 2; }
+  .queue { border-top: 1px solid var(--color-border); padding: 1.25rem 1rem 2rem; background: var(--color-surface); }
+  .queue__heading h2 { margin: 0 0 .8rem; font-size: 1.25rem; }
+  .queue ol { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+  .queue li a { display: grid; grid-template-columns: 6rem 1fr; align-items: center; gap: .7rem; border-radius: var(--radius-md); padding: .5rem; text-decoration: none; }
+  .queue li a:hover, .queue li.current a { background: var(--color-surface-soft); }
+  .queue img { aspect-ratio: 16 / 9; width: 100%; border-radius: .35rem; object-fit: cover; }
+  .queue li span { display: grid; min-width: 0; gap: .15rem; }
+  .queue small { color: var(--color-text-soft); font-size: .68rem; font-weight: 700; }
+  .queue strong { overflow: hidden; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+  .player-error { padding: 1rem; color: var(--color-danger); }
+  [hidden] { display: none !important; }
+  @media (min-width: 1024px) { .watch__header { padding-inline: 1.5rem; } .watch__layout { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; min-height: calc(100svh - 4rem); } .player-stage { background: var(--color-bg); } .player-frame { max-height: calc(100svh - 4rem); } .episode-info { width: min(100%, 70rem); margin-inline: auto; padding: 1.5rem 2rem 3rem; } .queue { max-height: calc(100svh - 4rem); overflow-y: auto; border-top: 0; border-left: 1px solid var(--color-border); } }
+</style>

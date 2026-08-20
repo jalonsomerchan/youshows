@@ -1,0 +1,16 @@
+---
+import SeriesDetail from '../../components/SeriesDetail.astro';
+import { defaultLocale } from '../../config/site';
+import { catalog, type Series } from '../../data/catalog';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export function getStaticPaths() {
+  return catalog.series.map((series) => ({ params: { slug: series.id }, props: { series } }));
+}
+
+const { series } = Astro.props as { series: Series };
+---
+
+<BaseLayout title={series.title} description={series.description} locale={defaultLocale}>
+  <SeriesDetail series={series} locale={defaultLocale} />
+</BaseLayout>

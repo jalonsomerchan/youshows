@@ -1,0 +1,83 @@
+---
+import type { Locale } from '../config/site';
+import { getAgeRatingLabel, getLanguageLabel } from '../config/series-metadata';
+import { getEpisodes, type Series } from '../data/catalog';
+import { useTranslations } from '../i18n/ui';
+import { getSeriesPath } from '../utils/streaming-paths';
+
+interface Props {
+  series: Series;
+  locale: Locale;
+  class?: string;
+}
+
+const { series, locale, class: className = '' } = Astro.props;
+const t = useTranslations(locale);
+const episodeIds = getEpisodes(series).map((episode) => episode.id);
+const languageLabel = getLanguageLabel(series.language, t);
+const ageRatingLabel = getAgeRatingLabel(series.ageRating, series.maturity, t);
+const tags = series.tags ?? [];
+---
+
+<article
+  class:list={['show-card', className]}
+  data-series-card
+  data-series-id={series.id}
+  data-series-title={series.title}
+  data-series-language={series.language}
+  data-series-age-rating={series.ageRating}
+  data-episode-ids={JSON.stringify(episodeIds)}
+  data-search-value={`${series.title} ${series.description} ${series.genres.join(' ')} ${tags.join(' ')} ${languageLabel} ${ageRatingLabel}`.toLocaleLowerCase()}
+>
+  <a class="show-card__link" href={getSeriesPath(series.id, locale)} aria-label={`${t('catalog.openSeries')} ${series.title}`}>
+    <span class="show-card__image-wrap">
+      <img
+        class="show-card__image"
+        src={series.artwork.poster}
+        width="480"
+        height="270"
+        loading="lazy"
+        decoding="async"
+        alt=""
+      />
+      <span class="show-card__shade"></span>
+    </span>
+    <span class="show-card__body">
+      <strong>{series.title}</strong>
+      <span>{series.year} · {languageLabel} · {ageRatingLabel}</span>
+    </span>
+  </a>
+  <button
+    class="show-card__save"
+    type="button"
+    data-toggle-series={series.id}
+    aria-pressed="false"
+    aria-label={`${t('library.add')} ${series.title}`}
+    data-label-add={t('library.add')}
+    data-label-remove={t('library.remove')}
+  >
+    <svg class="icon-plus" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+    <svg class="icon-check" aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 7" /></svg>
+  </button>
+  <span class="show-card__progress" data-card-progress hidden><span></span></span>
+</article>
+
+<style>
+  .show-card { --show-card-width: min(76vw, 20rem); position: relative; flex: 0 0 var(--show-card-width); width: var(--show-card-width); min-width: 0; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-surface); box-shadow: var(--shadow-sm); scroll-snap-align: start; transition: transform var(--transition-base), box-shadow var(--transition-base); }
+  .show-card:hover, .show-card:focus-within { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .show-card__link { display: block; color: inherit; text-decoration: none; }
+  .show-card__image-wrap { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; background: var(--color-surface-soft); }
+  .show-card__image { width: 100%; height: 100%; object-fit: cover; transition: transform var(--transition-slow); }
+  .show-card:hover .show-card__image { transform: scale(1.025); }
+  .show-card__shade { position: absolute; inset: auto 0 0; height: 40%; background: linear-gradient(transparent, rgb(0 0 0 / .42)); }
+  .show-card__body { display: grid; gap: .25rem; padding: .85rem 3rem .9rem 1rem; }
+  .show-card__body strong { overflow: hidden; font-size: .98rem; text-overflow: ellipsis; white-space: nowrap; }
+  .show-card__body span { color: var(--color-text-soft); font-size: .78rem; }
+  .show-card__save { position: absolute; right: .65rem; bottom: .65rem; display: grid; width: 2.25rem; height: 2.25rem; place-items: center; border: 1px solid var(--color-border); border-radius: 50%; background: var(--color-surface-raised); color: var(--color-text); cursor: pointer; }
+  .show-card__save svg { width: 1.1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+  .show-card__save .icon-check, .show-card__save[aria-pressed='true'] .icon-plus { display: none; }
+  .show-card__save[aria-pressed='true'] .icon-check { display: block; color: var(--color-success); }
+  .show-card__progress { position: absolute; inset: auto 0 0; height: 3px; background: rgb(255 255 255 / .25); }
+  .show-card__progress span { display: block; width: var(--progress, 0%); height: 100%; background: var(--color-primary); }
+  @media (min-width: 640px) { .show-card { --show-card-width: 18rem; } }
+</style>

@@ -8,12 +8,18 @@ export const localeLabels: Record<Locale, string> = {
   en: 'English',
 };
 
+export const localeFlags: Record<Locale, string> = {
+  es: '🇪🇸',
+  en: '🇬🇧',
+};
+
 export const siteConfig = {
-  name: 'Astro Template',
-  description: 'Plantilla base para crear proyectos con Astro.',
+  name: 'YouShows',
+  description: 'Tus series de YouTube, ordenadas y siempre a punto para continuar.',
   url: import.meta.env.ASTRO_SITE ?? 'https://jalonsomerchan.github.io',
   base: import.meta.env.ASTRO_BASE ?? '/',
-  repositoryUrl: import.meta.env.PUBLIC_REPOSITORY_URL ?? 'https://github.com/jalonsomerchan/astro-template',
+  repositoryUrl:
+    import.meta.env.PUBLIC_REPOSITORY_URL ?? 'https://github.com/jalonsomerchan/youshows',
   author: 'Jorge Alonso',
   defaultLocale,
   locales,

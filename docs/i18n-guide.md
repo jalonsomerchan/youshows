@@ -143,6 +143,12 @@ export const localeLabels: Record<Locale, string> = {
   en: 'English',
   fr: 'Français',
 };
+
+export const localeFlags: Record<Locale, string> = {
+  es: '🇪🇸',
+  en: '🇬🇧',
+  fr: '🇫🇷',
+};
 ```
 
 ### 3. Crear `src/i18n/translations/fr.json`
@@ -215,6 +221,9 @@ El selector básico está en `Header.astro` y usa:
 - `getAlternateLocales(locale)`
 - `getLocalizedPath('/', alternateLocale)`
 - `localeLabels`
+- `localeFlags`
+
+Las banderas son un apoyo visual. El nombre completo del idioma debe mantenerse para lectores de pantalla.
 
 Si se añaden páginas profundas, el selector puede necesitar conservar la ruta actual. No implementarlo de forma compleja hasta que el proyecto lo necesite.
 

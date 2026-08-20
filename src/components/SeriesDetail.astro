@@ -1,0 +1,163 @@
+---
+import type { Locale } from '../config/site';
+import { getAgeRatingLabel, getLanguageLabel } from '../config/series-metadata';
+import { getEpisodes, type Series } from '../data/catalog';
+import { useTranslations } from '../i18n/ui';
+import { getWatchPath } from '../utils/streaming-paths';
+import EpisodeCard from './EpisodeCard.astro';
+
+interface Props { series: Series; locale: Locale; }
+const { series, locale } = Astro.props;
+const t = useTranslations(locale);
+const episodes = getEpisodes(series);
+const languageLabel = getLanguageLabel(series.language, t);
+const ageRatingLabel = getAgeRatingLabel(series.ageRating, series.maturity, t);
+const tags = series.tags ?? [];
+const watchPaths = Object.fromEntries(episodes.map((episode) => [episode.id, getWatchPath(series.id, episode.id, locale)]));
+---
+
+<article class="series-detail" data-detail-series={series.id}>
+  <header class="series-hero" style={`--hero-image: url("${series.artwork.backdrop}")`}>
+    <div class="series-hero__content">
+      <p class="series-hero__eyebrow">{t('catalog.youtubeSeries')}</p>
+      <h1>{series.title}</h1>
+      <div class="series-hero__meta">
+        <span class="match">{t('home.recommended')}</span><span>{series.year}</span><span>{languageLabel}</span><span class="maturity">{ageRatingLabel}</span>
+        <span>{series.seasons.length} {series.seasons.length === 1 ? t('catalog.season') : t('catalog.seasons')}</span>
+      </div>
+      <p class="series-hero__description">{series.description}</p>
+      <p class="series-hero__genres"><strong>{t('catalog.genres')}:</strong> {series.genres.join(' · ')}</p>
+      {tags.length > 0 && (
+        <div class="series-hero__tags" aria-label={t('catalog.tags')}>
+          {tags.map((tag) => <span>#{tag}</span>)}
+        </div>
+      )}
+      <div class="series-hero__actions">
+        <a
+          class="button button--primary"
+          href={watchPaths[episodes[0]?.id]}
+          data-resume-series={series.id}
+          data-episode-ids={JSON.stringify(episodes.map((episode) => episode.id))}
+          data-watch-paths={JSON.stringify(watchPaths)}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z" /></svg>
+          <span>{t('player.play')}</span>
+        </a>
+        <button
+          class="button button--soft"
+          type="button"
+          data-series-save={series.id}
+          data-add={t('library.add')}
+          data-remove={t('library.remove')}
+          aria-pressed="false"
+        >
+          <svg class="save-plus" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+          <svg class="save-check" aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 7" /></svg>
+          <span>{t('library.add')}</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="episodes" aria-labelledby="episodes-title">
+    <div class="episodes__heading">
+      <div><p>{t('catalog.allEpisodes')}</p><h2 id="episodes-title">{t('catalog.episodes')}</h2></div>
+      {series.seasons.length > 1 && (
+        <label class="season-picker">
+          <span class="sr-only">{t('catalog.chooseSeason')}</span>
+          <select data-season-picker>
+            {series.seasons.map((season) => <option value={season.number}>{t('catalog.season')} {season.number}</option>)}
+          </select>
+        </label>
+      )}
+    </div>
+
+    {series.seasons.map((season, index) => (
+      <div class="season" data-season={season.number} hidden={index > 0}>
+        <div class="season__intro"><h3>{season.title}</h3><span>{season.episodes.length} {t('catalog.episodes').toLocaleLowerCase()}</span></div>
+        <div class="episode-list">
+          {season.episodes.map((episode) => <EpisodeCard series={series} episode={episode} locale={locale} />)}
+        </div>
+      </div>
+    ))}
+  </section>
+</article>
+
+<script>
+  import { episodeKey, getLibrary, getResumeEpisodeId, toggleSeries } from '../scripts/user-library';
+
+  const root = document.querySelector<HTMLElement>('[data-detail-series]');
+  const seriesId = root?.dataset.detailSeries ?? '';
+  const updateDetail = () => {
+    const state = getLibrary();
+    const saveButton = root?.querySelector<HTMLButtonElement>('[data-series-save]');
+    if (saveButton) {
+      const saved = state.mySeries.includes(seriesId);
+      saveButton.setAttribute('aria-pressed', String(saved));
+      const text = saveButton.querySelector('span');
+      if (text) text.textContent = saved ? saveButton.dataset.remove ?? '' : saveButton.dataset.add ?? '';
+    }
+
+    root?.querySelectorAll<HTMLElement>('[data-episode-card]').forEach((card) => {
+      const progress = state.episodes[episodeKey(seriesId, card.dataset.episodeId ?? '')];
+      const bar = card.querySelector<HTMLElement>('[data-episode-progress]');
+      const watched = card.querySelector<HTMLElement>('[data-watched-label]');
+      if (bar && progress?.duration) {
+        bar.hidden = false;
+        bar.style.setProperty('--progress', `${Math.min(100, progress.progress / progress.duration * 100)}%`);
+      }
+      if (watched) watched.hidden = !progress?.watched;
+    });
+
+    const resume = root?.querySelector<HTMLAnchorElement>('[data-resume-series]');
+    if (resume) {
+      const episodeIds = JSON.parse(resume.dataset.episodeIds ?? '[]') as string[];
+      const paths = JSON.parse(resume.dataset.watchPaths ?? '{}') as Record<string, string>;
+      const resumeId = getResumeEpisodeId(seriesId, episodeIds);
+      if (resumeId && paths[resumeId]) resume.href = paths[resumeId];
+    }
+  };
+
+  root?.querySelector('[data-series-save]')?.addEventListener('click', () => {
+    toggleSeries(seriesId);
+    updateDetail();
+  });
+  root?.querySelector<HTMLSelectElement>('[data-season-picker]')?.addEventListener('change', (event) => {
+    const selected = (event.currentTarget as HTMLSelectElement).value;
+    root.querySelectorAll<HTMLElement>('[data-season]').forEach((season) => {
+      season.hidden = season.dataset.season !== selected;
+    });
+  });
+  updateDetail();
+</script>
+
+<style>
+  .series-hero { position: relative; min-height: min(74svh, 44rem); display: flex; align-items: end; padding: 8rem 1rem 3rem; isolation: isolate; }
+  .series-hero::before { position: absolute; z-index: -2; inset: 0; background-image: var(--hero-image); background-position: center top; background-size: cover; content: ''; }
+  .series-hero::after { position: absolute; z-index: -1; inset: 0; background: linear-gradient(0deg, var(--color-bg), color-mix(in srgb, var(--color-bg), transparent 7%) 18%, transparent 60%), linear-gradient(90deg, color-mix(in srgb, var(--color-bg), transparent 8%), transparent 90%); content: ''; }
+  .series-hero__content { width: min(100%, 90rem); margin-inline: auto; }
+  .series-hero__eyebrow, .episodes__heading p { margin: 0 0 .45rem; color: var(--color-primary); font-size: .72rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+  .series-hero h1 { max-width: 19ch; margin: 0; font-size: clamp(2.3rem, 10vw, 5.2rem); font-weight: 900; letter-spacing: -.055em; line-height: .96; text-wrap: balance; }
+  .series-hero__meta { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; color: var(--color-text-muted); font-size: .82rem; font-weight: 650; }
+  .match { color: var(--color-success); }
+  .maturity { border: 1px solid var(--color-border-strong); border-radius: .25rem; padding-inline: .3rem; }
+  .series-hero__description { display: -webkit-box; max-width: 42rem; margin: .8rem 0; overflow: hidden; color: var(--color-text-muted); line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
+  .series-hero__genres { margin: 0; color: var(--color-text-soft); font-size: .82rem; }
+  .series-hero__genres strong { color: var(--color-text-muted); }
+  .series-hero__tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .65rem; }
+  .series-hero__tags span { border: 1px solid var(--color-border); border-radius: var(--radius-full); padding: .25rem .55rem; background: color-mix(in srgb, var(--color-surface), transparent 12%); color: var(--color-text-soft); font-size: .72rem; }
+  .series-hero__actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1.25rem; }
+  .series-hero__actions svg { width: 1.3rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+  .series-hero__actions .button--primary svg { fill: currentColor; stroke: none; }
+  [data-series-save] .save-check, [data-series-save][aria-pressed='true'] .save-plus { display: none; }
+  [data-series-save][aria-pressed='true'] .save-check { display: block; color: var(--color-success); }
+  .episodes { width: min(100% - 2rem, 72rem); margin: 0 auto; padding: 1rem 0 7rem; }
+  .episodes__heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: .75rem; }
+  .episodes__heading h2 { margin: 0; font-size: clamp(1.65rem, 6vw, 2.5rem); letter-spacing: -.035em; }
+  .season-picker select { min-height: 2.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: .55rem 2.2rem .55rem .8rem; background: var(--color-surface); color: var(--color-text); font: inherit; font-weight: 700; }
+  .season__intro { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 1.5rem 0 .35rem; }
+  .season__intro h3 { margin: 0; font-size: 1.1rem; }
+  .season__intro span { color: var(--color-text-soft); font-size: .8rem; }
+  [hidden] { display: none !important; }
+  @media (min-width: 768px) { .series-hero { padding: 10rem 3rem 5rem; } .series-hero__description { font-size: 1.05rem; } .episodes { padding-top: 2rem; } }
+</style>

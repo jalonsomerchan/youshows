@@ -12,7 +12,16 @@ export function getBasePath() {
 }
 
 export function withBasePath(path: string, basePath = getBasePath()) {
-  return joinPathSegments(basePath, path);
+  const joinedPath = joinPathSegments(basePath, path);
+  const lastSegment =
+    path
+      .replace(/[?#].*$/, '')
+      .split('/')
+      .filter(Boolean)
+      .at(-1) ?? '';
+  const isFilePath = /\.[a-z0-9]+$/i.test(lastSegment);
+
+  return isFilePath ? joinedPath.replace(/\/$/, '') : joinedPath;
 }
 
 export function stripBasePath(pathname: string, basePath = getBasePath()) {

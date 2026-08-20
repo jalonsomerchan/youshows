@@ -1,5 +1,5 @@
 {
-  "name": "astro-template",
+  "name": "youshows",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -13,6 +13,8 @@
     "format": "npx --yes prettier@latest --write \"**/*.{css,js,json,md,mjs,ts,yml,yaml}\"",
     "format:check": "npx --yes prettier@latest --check \"**/*.{css,js,json,md,mjs,ts,yml,yaml}\"",
     "clean": "node scripts/clean.mjs",
+    "playlist:add": "node scripts/youtube/add-playlist.mjs",
+    "playlist:ui": "node .local/playlist-admin/server.mjs",
     "astro": "astro"
   },
   "dependencies": {
