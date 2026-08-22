@@ -6,6 +6,8 @@
   "nav.search": "Search",
   "nav.myList": "My list",
   "nav.theme": "Change theme",
+  "nav.language": "Choose language",
+  "nav.currentLanguage": "Current language",
   "nav.settings": "Settings",
   "nav.backTo": "Back to",
   "nav.backToSeries": "Back to the show",

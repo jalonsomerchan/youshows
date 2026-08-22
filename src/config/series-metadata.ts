@@ -23,10 +23,16 @@ export type SeriesAgeRating = (typeof seriesAgeRatings)[number];
 
 export const languageFlagAssets: Partial<Record<SeriesLanguage, string>> = {
   es: 'language-flags/es.png',
-  'es-419': 'language-flags/es.png',
+  'es-419': 'language-flags/es-419.png',
   ca: 'language-flags/ca.png',
   en: 'language-flags/en.png',
   eu: 'language-flags/eu.png',
+  gl: 'language-flags/gl.png',
+  fr: 'language-flags/fr.png',
+  pt: 'language-flags/pt.png',
+  it: 'language-flags/it.png',
+  de: 'language-flags/de.png',
+  ja: 'language-flags/ja.png',
 };
 
 export function getLanguageFlagAsset(language: string | undefined): string | undefined {

@@ -68,9 +68,16 @@ describe('project smoke checks', () => {
       'public/pwa-icon-512.png',
       'public/apple-touch-icon.png',
       'public/language-flags/es.png',
+      'public/language-flags/es-419.png',
       'public/language-flags/en.png',
       'public/language-flags/ca.png',
       'public/language-flags/eu.png',
+      'public/language-flags/gl.png',
+      'public/language-flags/fr.png',
+      'public/language-flags/pt.png',
+      'public/language-flags/it.png',
+      'public/language-flags/de.png',
+      'public/language-flags/ja.png',
       'scripts/youtube/add-playlist.mjs',
     ].forEach((path) => {
       assert.equal(existsSync(join(root, path)), true, `${path} should exist`);
@@ -182,7 +189,7 @@ describe('project smoke checks', () => {
     const siteConfig = readText('src/config/site.ts');
     const header = readText('src/components/Header.astro');
     assert.match(siteConfig, /language-flags\/es\.png/);
-    assert.match(header, /withBasePath\(localeFlags\[alternateLocale\]\)/);
+    assert.match(header, /withBasePath\(localeFlags\[menuLocale\]\)/);
     assert.doesNotMatch(siteConfig, /🇪🇸|🇬🇧|🇦🇩|🇪🇺/);
   });
 
@@ -201,6 +208,8 @@ describe('project smoke checks', () => {
     assert.match(envExample, /PUBLIC_REPOSITORY_URL/);
     assert.match(envExample, /YOUTUBE_API_KEY/);
     assert.match(header, /t\('nav\.main'\)/);
+    assert.match(header, /locale-menu/);
+    assert.match(header, /data-theme-toggle/);
     assert.match(header, /data-settings-open/);
     assert.match(contentPreferences, /alon-kids\.content-preferences\.v1/);
     assert.match(contentPreferences, /alon-kids\.content-onboarding\.v1/);
