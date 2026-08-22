@@ -6,6 +6,7 @@ import {
 } from '../config/series-metadata';
 
 export const CONTENT_PREFERENCES_STORAGE_KEY = 'alon-kids.content-preferences.v1';
+export const CONTENT_ONBOARDING_STORAGE_KEY = 'alon-kids.content-onboarding.v1';
 export const CONTENT_PREFERENCES_EVENT = 'alon-kids:content-preferences';
 const LEGACY_STORAGE_KEY = 'youshows.content-preferences.v1';
 
@@ -50,6 +51,23 @@ export function getContentPreferences(): ContentPreferences {
 export function saveContentPreferences(preferences: ContentPreferences): void {
   localStorage.setItem(CONTENT_PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
   window.dispatchEvent(new CustomEvent(CONTENT_PREFERENCES_EVENT, { detail: preferences }));
+}
+
+export function isContentOnboardingComplete(): boolean {
+  try {
+    return Boolean(
+      localStorage.getItem(CONTENT_ONBOARDING_STORAGE_KEY) ||
+        localStorage.getItem(CONTENT_PREFERENCES_STORAGE_KEY) ||
+        localStorage.getItem(LEGACY_STORAGE_KEY)
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function completeContentOnboarding(preferences: ContentPreferences): void {
+  saveContentPreferences(preferences);
+  localStorage.setItem(CONTENT_ONBOARDING_STORAGE_KEY, 'completed');
 }
 
 export function resetContentPreferences(): void {

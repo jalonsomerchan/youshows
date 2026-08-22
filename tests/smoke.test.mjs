@@ -60,7 +60,9 @@ describe('project smoke checks', () => {
       'src/data/catalog.ts',
       'src/scripts/user-library.ts',
       'src/scripts/content-preferences.ts',
+      'src/scripts/content-onboarding.ts',
       'src/components/ContentSettings.astro',
+      'src/components/ContentOnboarding.astro',
       'public/sw.js',
       'public/pwa-icon-192.png',
       'public/pwa-icon-512.png',
@@ -179,6 +181,7 @@ describe('project smoke checks', () => {
     const localizedHome = readText('src/pages/[locale]/index.astro');
     const envExample = readText('.env.example');
     const contentPreferences = readText('src/scripts/content-preferences.ts');
+    const contentOnboarding = readText('src/scripts/content-onboarding.ts');
 
     assert.match(siteConfig, /repositoryUrl/);
     assert.match(envExample, /PUBLIC_REPOSITORY_URL/);
@@ -186,6 +189,8 @@ describe('project smoke checks', () => {
     assert.match(header, /t\('nav\.main'\)/);
     assert.match(header, /data-settings-open/);
     assert.match(contentPreferences, /alon-kids\.content-preferences\.v1/);
+    assert.match(contentPreferences, /alon-kids\.content-onboarding\.v1/);
+    assert.match(contentOnboarding, /isContentOnboardingComplete/);
     assert.match(home, /StreamingHome/);
     assert.match(localizedHome, /StreamingHome/);
     assert.equal(existsSync(join(root, 'src/components/SeriesDetail.astro')), true);
