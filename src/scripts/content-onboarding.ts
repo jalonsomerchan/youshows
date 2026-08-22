@@ -1,4 +1,5 @@
 import {
+  CONTENT_ONBOARDING_EVENT,
   completeContentOnboarding,
   getContentPreferences,
   isContentOnboardingComplete,
@@ -84,13 +85,16 @@ function complete(): void {
   dialog.close();
 }
 
-if (dialog && isStandalonePwa && !isContentOnboardingComplete()) {
+function openOnboarding(): void {
+  if (!dialog || !isStandalonePwa) return;
   syncForm();
   showStep('languages');
   dialog.removeAttribute('aria-hidden');
-  dialog.showModal();
+  if (!dialog.open) dialog.showModal();
   dialog.querySelector<HTMLInputElement>('[data-onboarding-group="languages"]')?.focus();
 }
+
+if (!isContentOnboardingComplete()) openOnboarding();
 
 dialog?.addEventListener('change', () => showError());
 dialog?.addEventListener('cancel', (event) => {
@@ -104,3 +108,4 @@ dialog
 dialog?.querySelector('[data-onboarding-next]')?.addEventListener('click', next);
 dialog?.querySelector('[data-onboarding-back]')?.addEventListener('click', () => showStep('languages'));
 dialog?.querySelector('[data-onboarding-complete]')?.addEventListener('click', complete);
+window.addEventListener(CONTENT_ONBOARDING_EVENT, openOnboarding);

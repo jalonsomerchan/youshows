@@ -2,6 +2,7 @@ import {
   CONTENT_PREFERENCES_EVENT,
   CONTENT_PREFERENCES_STORAGE_KEY,
   getContentPreferences,
+  restartContentOnboarding,
   resetContentPreferences,
   saveContentPreferences,
   type ContentPreferences,
@@ -10,6 +11,10 @@ import {
 type PreferenceGroup = 'languages' | 'ageRatings';
 
 const dialog = document.querySelector<HTMLDialogElement>('[data-content-settings]');
+const restartButton = dialog?.querySelector<HTMLButtonElement>('[data-settings-restart-onboarding]');
+const isStandalonePwa =
+  window.matchMedia('(display-mode: standalone)').matches ||
+  Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
 
 function getCheckboxes(group: PreferenceGroup): HTMLInputElement[] {
   return dialog
@@ -58,6 +63,11 @@ document.addEventListener('click', (event) => {
     syncForm();
     return;
   }
+  if (target.closest('[data-settings-restart-onboarding]')) {
+    dialog?.close();
+    restartContentOnboarding();
+    return;
+  }
 
   const groupAction = target.closest<HTMLButtonElement>('[data-settings-group-action]');
   if (!groupAction) return;
@@ -77,3 +87,4 @@ window.addEventListener('storage', (event) => {
 });
 
 syncForm();
+if (restartButton) restartButton.hidden = !isStandalonePwa;

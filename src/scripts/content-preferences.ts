@@ -8,6 +8,7 @@ import {
 export const CONTENT_PREFERENCES_STORAGE_KEY = 'alon-kids.content-preferences.v1';
 export const CONTENT_ONBOARDING_STORAGE_KEY = 'alon-kids.content-onboarding.v1';
 export const CONTENT_PREFERENCES_EVENT = 'alon-kids:content-preferences';
+export const CONTENT_ONBOARDING_EVENT = 'alon-kids:content-onboarding';
 const LEGACY_STORAGE_KEY = 'youshows.content-preferences.v1';
 
 export interface ContentPreferences {
@@ -68,6 +69,12 @@ export function isContentOnboardingComplete(): boolean {
 export function completeContentOnboarding(preferences: ContentPreferences): void {
   saveContentPreferences(preferences);
   localStorage.setItem(CONTENT_ONBOARDING_STORAGE_KEY, 'completed');
+}
+
+export function restartContentOnboarding(): void {
+  resetContentPreferences();
+  localStorage.removeItem(CONTENT_ONBOARDING_STORAGE_KEY);
+  window.dispatchEvent(new Event(CONTENT_ONBOARDING_EVENT));
 }
 
 export function resetContentPreferences(): void {

@@ -183,6 +183,7 @@ describe('project smoke checks', () => {
     const contentPreferences = readText('src/scripts/content-preferences.ts');
     const contentOnboarding = readText('src/scripts/content-onboarding.ts');
     const onboardingComponent = readText('src/components/ContentOnboarding.astro');
+    const contentSettings = readText('src/scripts/content-settings.ts');
 
     assert.match(siteConfig, /repositoryUrl/);
     assert.match(envExample, /PUBLIC_REPOSITORY_URL/);
@@ -194,6 +195,8 @@ describe('project smoke checks', () => {
     assert.match(contentOnboarding, /isContentOnboardingComplete/);
     assert.match(contentOnboarding, /completeWithAllContent/);
     assert.match(contentOnboarding, /display-mode: standalone/);
+    assert.match(contentPreferences, /restartContentOnboarding/);
+    assert.match(contentSettings, /data-settings-restart-onboarding/);
     assert.match(onboardingComponent, /data-onboarding-panel="languages"/);
     assert.match(onboardingComponent, /data-onboarding-panel="ageRatings"/);
     assert.match(onboardingComponent, /data-onboarding-skip/);

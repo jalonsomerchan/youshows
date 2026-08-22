@@ -48,6 +48,7 @@
   "settings.emptyTitle": "No hay series con estos ajustes",
   "settings.emptyDescription": "Cambia los idiomas o edades seleccionados para volver a ver contenido.",
   "settings.adjust": "Cambiar ajustes",
+  "settings.restartOnboarding": "Volver a configurar preferencias",
   "onboarding.eyebrow": "Personaliza Alon Kids",
   "onboarding.title": "Configura lo que quieres ver",
   "onboarding.description": "Podrás cambiar estas preferencias cuando quieras desde Ajustes.",
