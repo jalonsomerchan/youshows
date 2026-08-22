@@ -8,6 +8,9 @@ import {
 type PreferenceGroup = 'languages' | 'ageRatings';
 
 const dialog = document.querySelector<HTMLDialogElement>('[data-content-onboarding]');
+const isStandalonePwa =
+  window.matchMedia('(display-mode: standalone)').matches ||
+  Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
 
 function getCheckboxes(group: PreferenceGroup): HTMLInputElement[] {
   return dialog
@@ -40,9 +43,36 @@ function showError(message = ''): void {
   if (error) error.textContent = message;
 }
 
+function showStep(step: PreferenceGroup): void {
+  dialog?.querySelectorAll<HTMLElement>('[data-onboarding-panel]').forEach((panel) => {
+    panel.hidden = panel.dataset.onboardingPanel !== step;
+  });
+  const progress = dialog?.querySelector<HTMLElement>('[data-onboarding-progress]');
+  if (progress) {
+    progress.textContent =
+      step === 'languages' ? dialog?.dataset.stepLanguages ?? '' : dialog?.dataset.stepAges ?? '';
+  }
+  showError();
+}
+
+function completeWithAllContent(): void {
+  completeContentOnboarding({ version: 1, languages: null, ageRatings: null });
+  dialog?.close();
+}
+
+function next(): void {
+  if (!hasSelection('languages')) {
+    showError(dialog?.dataset.languageRequired);
+    return;
+  }
+
+  showStep('ageRatings');
+  dialog?.querySelector<HTMLInputElement>('[data-onboarding-group="ageRatings"]')?.focus();
+}
+
 function complete(): void {
-  if (!dialog || !hasSelection('languages') || !hasSelection('ageRatings')) {
-    showError(dialog?.dataset.selectionRequired);
+  if (!dialog || !hasSelection('ageRatings')) {
+    showError(dialog?.dataset.ageRequired);
     return;
   }
 
@@ -54,12 +84,23 @@ function complete(): void {
   dialog.close();
 }
 
-if (dialog && !isContentOnboardingComplete()) {
+if (dialog && isStandalonePwa && !isContentOnboardingComplete()) {
   syncForm();
+  showStep('languages');
+  dialog.removeAttribute('aria-hidden');
   dialog.showModal();
   dialog.querySelector<HTMLInputElement>('[data-onboarding-group="languages"]')?.focus();
 }
 
 dialog?.addEventListener('change', () => showError());
-dialog?.addEventListener('cancel', (event) => event.preventDefault());
+dialog?.addEventListener('cancel', (event) => {
+  event.preventDefault();
+  completeWithAllContent();
+});
+dialog?.querySelector('[data-onboarding-close]')?.addEventListener('click', completeWithAllContent);
+dialog
+  ?.querySelectorAll('[data-onboarding-skip]')
+  .forEach((button) => button.addEventListener('click', completeWithAllContent));
+dialog?.querySelector('[data-onboarding-next]')?.addEventListener('click', next);
+dialog?.querySelector('[data-onboarding-back]')?.addEventListener('click', () => showStep('languages'));
 dialog?.querySelector('[data-onboarding-complete]')?.addEventListener('click', complete);

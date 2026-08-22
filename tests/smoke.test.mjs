@@ -182,6 +182,7 @@ describe('project smoke checks', () => {
     const envExample = readText('.env.example');
     const contentPreferences = readText('src/scripts/content-preferences.ts');
     const contentOnboarding = readText('src/scripts/content-onboarding.ts');
+    const onboardingComponent = readText('src/components/ContentOnboarding.astro');
 
     assert.match(siteConfig, /repositoryUrl/);
     assert.match(envExample, /PUBLIC_REPOSITORY_URL/);
@@ -191,6 +192,12 @@ describe('project smoke checks', () => {
     assert.match(contentPreferences, /alon-kids\.content-preferences\.v1/);
     assert.match(contentPreferences, /alon-kids\.content-onboarding\.v1/);
     assert.match(contentOnboarding, /isContentOnboardingComplete/);
+    assert.match(contentOnboarding, /completeWithAllContent/);
+    assert.match(contentOnboarding, /display-mode: standalone/);
+    assert.match(onboardingComponent, /data-onboarding-panel="languages"/);
+    assert.match(onboardingComponent, /data-onboarding-panel="ageRatings"/);
+    assert.match(onboardingComponent, /data-onboarding-skip/);
+    assert.match(onboardingComponent, /data-nosnippet/);
     assert.match(home, /StreamingHome/);
     assert.match(localizedHome, /StreamingHome/);
     assert.equal(existsSync(join(root, 'src/components/SeriesDetail.astro')), true);

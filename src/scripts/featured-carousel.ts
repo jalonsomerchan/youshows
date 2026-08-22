@@ -5,6 +5,19 @@ interface CarouselState {
 
 const carouselStates = new WeakMap<HTMLElement, CarouselState>();
 
+function shuffleChildren(parent: Element): void {
+  const children = Array.from(parent.children);
+
+  for (let index = children.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    const current = children[index];
+    children[index] = children[randomIndex];
+    children[randomIndex] = current;
+  }
+
+  children.forEach((child) => parent.append(child));
+}
+
 function getSlides(carousel: HTMLElement): HTMLElement[] {
   return Array.from(carousel.querySelectorAll<HTMLElement>('[data-featured-series]'));
 }
@@ -63,6 +76,11 @@ function move(carousel: HTMLElement, direction: -1 | 1): void {
 function initializeCarousel(carousel: HTMLElement): void {
   if (carouselStates.has(carousel)) return;
   carouselStates.set(carousel, {});
+
+  const slides = carousel.querySelector<HTMLElement>('.featured-carousel__slides');
+  const dots = carousel.querySelector<HTMLElement>('.featured-carousel__dots');
+  if (slides) shuffleChildren(slides);
+  if (dots) shuffleChildren(dots);
 
   carousel.addEventListener('click', (event) => {
     const target = event.target as Element;
