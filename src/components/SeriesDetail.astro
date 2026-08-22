@@ -1,9 +1,10 @@
 ---
 import type { Locale } from '../config/site';
-import { getAgeRatingLabel, getLanguageLabel } from '../config/series-metadata';
+import { getAgeRatingLabel, getLanguageFlagAsset, getLanguageLabel } from '../config/series-metadata';
 import { getEpisodes, type Series } from '../data/catalog';
 import { useTranslations } from '../i18n/ui';
 import { getWatchPath } from '../utils/streaming-paths';
+import { withBasePath } from '../utils/paths';
 import EpisodeCard from './EpisodeCard.astro';
 
 interface Props { series: Series; locale: Locale; }
@@ -11,6 +12,7 @@ const { series, locale } = Astro.props;
 const t = useTranslations(locale);
 const episodes = getEpisodes(series);
 const languageLabel = getLanguageLabel(series.language, t);
+const languageFlag = getLanguageFlagAsset(series.language);
 const ageRatingLabel = getAgeRatingLabel(series.ageRating, series.maturity, t);
 const tags = series.tags ?? [];
 const watchPaths = Object.fromEntries(episodes.map((episode) => [episode.id, getWatchPath(series.id, episode.id, locale)]));
@@ -22,7 +24,7 @@ const watchPaths = Object.fromEntries(episodes.map((episode) => [episode.id, get
       <p class="series-hero__eyebrow">{t('catalog.youtubeSeries')}</p>
       <h1>{series.title}</h1>
       <div class="series-hero__meta">
-        <span class="match">{t('home.recommended')}</span><span>{series.year}</span><span>{languageLabel}</span><span class="maturity">{ageRatingLabel}</span>
+        <span class="match">{t('home.recommended')}</span><span>{series.year}</span><span class="series-hero__language">{languageFlag && <img src={withBasePath(languageFlag)} width="28" height="19" alt="" aria-hidden="true" />}{languageLabel}</span><span class="maturity">{ageRatingLabel}</span>
         <span>{series.seasons.length} {series.seasons.length === 1 ? t('catalog.season') : t('catalog.seasons')}</span>
       </div>
       <p class="series-hero__description">{series.description}</p>
@@ -140,6 +142,8 @@ const watchPaths = Object.fromEntries(episodes.map((episode) => [episode.id, get
   .series-hero h1 { max-width: 19ch; margin: 0; font-size: clamp(2.3rem, 10vw, 5.2rem); font-weight: 900; letter-spacing: -.055em; line-height: .96; text-wrap: balance; }
   .series-hero__meta { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; color: var(--color-text-muted); font-size: .82rem; font-weight: 650; }
   .match { color: var(--color-success); }
+  .series-hero__language { display: inline-flex; align-items: center; gap: .35rem; }
+  .series-hero__language img { width: 1.35rem; height: .9rem; border-radius: .15rem; object-fit: cover; box-shadow: 0 0 0 1px rgb(15 23 42 / .18); }
   .maturity { border: 1px solid var(--color-border-strong); border-radius: .25rem; padding-inline: .3rem; }
   .series-hero__description { display: -webkit-box; max-width: 42rem; margin: .8rem 0; overflow: hidden; color: var(--color-text-muted); line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
   .series-hero__genres { margin: 0; color: var(--color-text-soft); font-size: .82rem; }

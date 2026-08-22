@@ -11,10 +11,10 @@ export const localeLabels: Record<Locale, string> = {
 };
 
 export const localeFlags: Record<Locale, string> = {
-  es: '🇪🇸',
-  en: '🇬🇧',
-  ca: '🇦🇩',
-  eu: '🇪🇺',
+  es: 'language-flags/es.png',
+  en: 'language-flags/en.png',
+  ca: 'language-flags/ca.png',
+  eu: 'language-flags/eu.png',
 };
 
 export const siteConfig = {

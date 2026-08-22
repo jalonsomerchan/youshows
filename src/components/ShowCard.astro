@@ -1,9 +1,10 @@
 ---
 import type { Locale } from '../config/site';
-import { getAgeRatingLabel, getLanguageLabel } from '../config/series-metadata';
+import { getAgeRatingLabel, getLanguageFlagAsset, getLanguageLabel } from '../config/series-metadata';
 import { getEpisodes, type Series } from '../data/catalog';
 import { useTranslations } from '../i18n/ui';
 import { getSeriesPath } from '../utils/streaming-paths';
+import { withBasePath } from '../utils/paths';
 
 interface Props {
   series: Series;
@@ -15,6 +16,7 @@ const { series, locale, class: className = '' } = Astro.props;
 const t = useTranslations(locale);
 const episodeIds = getEpisodes(series).map((episode) => episode.id);
 const languageLabel = getLanguageLabel(series.language, t);
+const languageFlag = getLanguageFlagAsset(series.language);
 const ageRatingLabel = getAgeRatingLabel(series.ageRating, series.maturity, t);
 const tags = series.tags ?? [];
 ---
@@ -44,7 +46,10 @@ const tags = series.tags ?? [];
     </span>
     <span class="show-card__body">
       <strong>{series.title}</strong>
-      <span>{series.year} · {languageLabel} · {ageRatingLabel}</span>
+      <span class="show-card__meta">
+        {languageFlag && <img src={withBasePath(languageFlag)} width="28" height="19" loading="lazy" decoding="async" alt="" aria-hidden="true" />}
+        <span>{series.year} · {languageLabel} · {ageRatingLabel}</span>
+      </span>
     </span>
   </a>
   <button
@@ -72,7 +77,9 @@ const tags = series.tags ?? [];
   .show-card__shade { position: absolute; inset: auto 0 0; height: 40%; background: linear-gradient(transparent, rgb(0 0 0 / .42)); }
   .show-card__body { display: grid; gap: .25rem; padding: .85rem 3rem .9rem 1rem; }
   .show-card__body strong { overflow: hidden; font-size: .98rem; text-overflow: ellipsis; white-space: nowrap; }
-  .show-card__body span { color: var(--color-text-soft); font-size: .78rem; }
+  .show-card__meta { display: flex; align-items: center; gap: .35rem; min-width: 0; color: var(--color-text-soft); font-size: .78rem; }
+  .show-card__meta img { width: 1.35rem; height: .9rem; flex: none; border-radius: .15rem; object-fit: cover; box-shadow: 0 0 0 1px rgb(15 23 42 / .18); }
+  .show-card__meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .show-card__save { position: absolute; right: .65rem; bottom: .65rem; display: grid; width: 2.25rem; height: 2.25rem; place-items: center; border: 1px solid var(--color-border); border-radius: 50%; background: var(--color-surface-raised); color: var(--color-text); cursor: pointer; }
   .show-card__save svg { width: 1.1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
   .show-card__save .icon-check, .show-card__save[aria-pressed='true'] .icon-plus { display: none; }

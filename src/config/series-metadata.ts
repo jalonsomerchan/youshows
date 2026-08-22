@@ -21,6 +21,18 @@ export const seriesAgeRatings = ['none', 'all', '3', '7', '12', '16', '18'] as c
 export type SeriesLanguage = (typeof seriesLanguages)[number];
 export type SeriesAgeRating = (typeof seriesAgeRatings)[number];
 
+export const languageFlagAssets: Partial<Record<SeriesLanguage, string>> = {
+  es: 'language-flags/es.png',
+  'es-419': 'language-flags/es.png',
+  ca: 'language-flags/ca.png',
+  en: 'language-flags/en.png',
+  eu: 'language-flags/eu.png',
+};
+
+export function getLanguageFlagAsset(language: string | undefined): string | undefined {
+  return languageFlagAssets[language as SeriesLanguage];
+}
+
 type Translator = (key: TranslationKey) => string;
 
 const languageKeys: Record<SeriesLanguage, TranslationKey> = {

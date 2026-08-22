@@ -1,9 +1,10 @@
 ---
 import type { Locale } from '../config/site';
-import { getAgeRatingLabel, getLanguageLabel } from '../config/series-metadata';
+import { getAgeRatingLabel, getLanguageFlagAsset, getLanguageLabel } from '../config/series-metadata';
 import { getEpisodes, type Series } from '../data/catalog';
 import { useTranslations } from '../i18n/ui';
 import { getSeriesPath, getWatchPath } from '../utils/streaming-paths';
+import { withBasePath } from '../utils/paths';
 
 interface Props {
   series: Series;
@@ -15,6 +16,7 @@ const { series, locale, index, isActive } = Astro.props;
 const t = useTranslations(locale);
 const episodes = getEpisodes(series);
 const languageLabel = getLanguageLabel(series.language, t);
+const languageFlag = getLanguageFlagAsset(series.language);
 const ageRatingLabel = getAgeRatingLabel(series.ageRating, series.maturity, t);
 const watchPaths = Object.fromEntries(episodes.map((episode) => [episode.id, getWatchPath(series.id, episode.id, locale)]));
 const titleId = `featured-title-${series.id}`;
@@ -43,7 +45,7 @@ const titleId = `featured-title-${series.id}`;
     <div class="featured__meta">
       <span class="featured__match">{t('home.recommended')}</span>
       <span>{series.year}</span>
-      <span>{languageLabel}</span>
+      <span class="featured__language">{languageFlag && <img src={withBasePath(languageFlag)} width="28" height="19" alt="" aria-hidden="true" />}{languageLabel}</span>
       <span class="featured__maturity">{ageRatingLabel}</span>
       <span>{series.seasons.length} {series.seasons.length === 1 ? t('catalog.season') : t('catalog.seasons')}</span>
     </div>
@@ -76,6 +78,8 @@ const titleId = `featured-title-${series.id}`;
   .featured p { display: -webkit-box; max-width: 38rem; margin: 1rem 0; overflow: hidden; color: var(--color-text-muted); font-size: clamp(.95rem, 2.5vw, 1.12rem); line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
   .featured__meta { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; color: var(--color-text-muted); font-size: .82rem; font-weight: 650; }
   .featured__match { color: var(--color-success); }
+  .featured__language { display: inline-flex; align-items: center; gap: .35rem; }
+  .featured__language img { width: 1.35rem; height: .9rem; border-radius: .15rem; object-fit: cover; box-shadow: 0 0 0 1px rgb(15 23 42 / .18); }
   .featured__maturity { border: 1px solid var(--color-border-strong); border-radius: .25rem; padding: .1rem .35rem; }
   .featured__actions { display: flex; gap: .65rem; margin-top: 1.35rem; }
   .featured__actions svg { width: 1.35rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }

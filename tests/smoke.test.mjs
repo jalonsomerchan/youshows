@@ -67,6 +67,10 @@ describe('project smoke checks', () => {
       'public/pwa-icon-192.png',
       'public/pwa-icon-512.png',
       'public/apple-touch-icon.png',
+      'public/language-flags/es.png',
+      'public/language-flags/en.png',
+      'public/language-flags/ca.png',
+      'public/language-flags/eu.png',
       'scripts/youtube/add-playlist.mjs',
     ].forEach((path) => {
       assert.equal(existsSync(join(root, path)), true, `${path} should exist`);
@@ -172,6 +176,14 @@ describe('project smoke checks', () => {
     assert.match(pathHelpers, /getAbsoluteUrl/);
     assert.match(manifest, /start_url/);
     assert.match(robots, /sitemap-index\.xml/);
+  });
+
+  it('uses image assets instead of emoji flags', () => {
+    const siteConfig = readText('src/config/site.ts');
+    const header = readText('src/components/Header.astro');
+    assert.match(siteConfig, /language-flags\/es\.png/);
+    assert.match(header, /withBasePath\(localeFlags\[alternateLocale\]\)/);
+    assert.doesNotMatch(siteConfig, /🇪🇸|🇬🇧|🇦🇩|🇪🇺/);
   });
 
   it('keeps the streaming experience modular and translated', () => {
