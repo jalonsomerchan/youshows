@@ -240,8 +240,9 @@ describe('project smoke checks', () => {
     catalog.series.forEach((series) => {
       assert.match(series.id, /^[a-z0-9-]+$/);
       assert.ok(Array.isArray(series.tags));
+      assert.ok(series.tags.length >= 3 && series.tags.length <= 4);
       assert.ok(
-        ['none', 'es', 'ca', 'en', 'eu', 'gl', 'fr', 'pt', 'it', 'de', 'ja', 'other'].includes(
+        ['none', 'es', 'es-419', 'ca', 'en', 'eu', 'gl', 'fr', 'pt', 'it', 'de', 'ja', 'other'].includes(
           series.language
         )
       );

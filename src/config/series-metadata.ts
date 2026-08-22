@@ -3,6 +3,7 @@ import type { TranslationKey } from '../i18n/ui';
 export const seriesLanguages = [
   'none',
   'es',
+  'es-419',
   'ca',
   'en',
   'eu',
@@ -25,6 +26,7 @@ type Translator = (key: TranslationKey) => string;
 const languageKeys: Record<SeriesLanguage, TranslationKey> = {
   none: 'metadata.language.none',
   es: 'metadata.language.es',
+  'es-419': 'metadata.language.es-419',
   ca: 'metadata.language.ca',
   en: 'metadata.language.en',
   eu: 'metadata.language.eu',
