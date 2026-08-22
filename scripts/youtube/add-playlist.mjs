@@ -7,6 +7,7 @@ const catalogPath = resolve('src/data/catalog.json');
 const supportedLanguages = [
   'none',
   'es',
+  'es-419',
   'ca',
   'en',
   'eu',
@@ -25,7 +26,7 @@ const apiKey = process.env.YOUTUBE_API_KEY;
 
 if (!playlistId)
   fail(
-    'Uso: npm run playlist:add -- <URL-o-ID> [--id serie] [--title título] [--language es] [--age-rating all] [--tags "Uno,Dos"]'
+    'Uso: npm run playlist:add -- <URL-o-ID> [--id serie] [--title título] [--language es|es-419] [--age-rating all] [--tags "Uno,Dos"]'
   );
 if (!apiKey) fail('Falta YOUTUBE_API_KEY. Añádela a tu entorno antes de importar la playlist.');
 
