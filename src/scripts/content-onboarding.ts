@@ -9,9 +9,6 @@ import {
 type PreferenceGroup = 'languages' | 'ageRatings';
 
 const dialog = document.querySelector<HTMLDialogElement>('[data-content-onboarding]');
-const isStandalonePwa =
-  window.matchMedia('(display-mode: standalone)').matches ||
-  Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
 
 function getCheckboxes(group: PreferenceGroup): HTMLInputElement[] {
   return dialog
@@ -86,7 +83,7 @@ function complete(): void {
 }
 
 function openOnboarding(): void {
-  if (!dialog || !isStandalonePwa) return;
+  if (!dialog) return;
   syncForm();
   showStep('languages');
   dialog.removeAttribute('aria-hidden');

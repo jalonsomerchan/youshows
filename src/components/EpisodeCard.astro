@@ -8,22 +8,23 @@ interface Props { series: Series; episode: Episode; locale: Locale; }
 const { series, episode, locale } = Astro.props;
 const t = useTranslations(locale);
 const minutes = Math.max(1, Math.round(episode.durationSeconds / 60));
+const watchPath = getWatchPath(series.id, episode.id, locale);
 ---
 
 <article class="episode" data-episode-card data-episode-id={episode.id} data-series-id={series.id}>
-  <a class="episode__media" href={getWatchPath(series.id, episode.id, locale)} aria-label={`${t('player.playEpisode')} ${episode.episode}: ${episode.title}`}>
+  <a class="episode__media" href={watchPath} aria-label={`${t('player.playEpisode')} ${episode.episode}: ${episode.title}`}>
     <img src={episode.thumbnail} width="320" height="180" loading="lazy" decoding="async" alt="" />
     <span class="episode__play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 7 8 5-8 5Z" /></svg></span>
     <span class="episode__progress" data-episode-progress hidden><span></span></span>
   </a>
-  <div class="episode__body">
+  <a class="episode__body" href={watchPath} aria-label={`${t('player.playEpisode')} ${episode.episode}: ${episode.title}`}>
     <div class="episode__heading">
       <h3><span>{episode.episode}.</span> {episode.title}</h3>
       <span>{minutes} {t('catalog.minutes')}</span>
     </div>
     <p>{episode.description}</p>
     <span class="episode__watched" data-watched-label hidden>✓ {t('library.watched')}</span>
-  </div>
+  </a>
 </article>
 
 <style>
@@ -34,11 +35,13 @@ const minutes = Math.max(1, Math.round(episode.durationSeconds / 60));
   .episode__play svg { width: 1.2rem; fill: currentColor; }
   .episode__progress { position: absolute; inset: auto 0 0; height: 3px; background: rgb(255 255 255 / .3); }
   .episode__progress span { display: block; width: var(--progress, 0%); height: 100%; background: var(--color-primary); }
-  .episode__body { min-width: 0; }
+  .episode__body { display: block; min-width: 0; color: inherit; text-decoration: none; }
   .episode__heading { display: flex; align-items: start; justify-content: space-between; gap: .5rem; }
   .episode h3 { margin: 0; font-size: .9rem; line-height: 1.3; }
   .episode__heading > span { flex: none; color: var(--color-text-soft); font-size: .72rem; }
   .episode p { display: -webkit-box; margin: .35rem 0 0; overflow: hidden; color: var(--color-text-muted); font-size: .78rem; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
   .episode__watched { display: inline-block; margin-top: .35rem; color: var(--color-success); font-size: .72rem; font-weight: 700; }
+  .episode__body:hover h3, .episode__body:focus-visible h3 { color: var(--color-primary); }
+  .episode__body:focus-visible { outline: 2px solid var(--color-primary); outline-offset: .25rem; border-radius: var(--radius-sm); }
   @media (min-width: 640px) { .episode { grid-template-columns: 12rem 1fr; padding: 1rem; border: 1px solid transparent; border-radius: var(--radius-lg); } .episode:hover { border-color: var(--color-border); background: var(--color-surface-soft); } .episode h3 { font-size: 1rem; } .episode p { font-size: .875rem; -webkit-line-clamp: 3; } }
 </style>

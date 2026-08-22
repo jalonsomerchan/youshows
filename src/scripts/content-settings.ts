@@ -11,10 +11,6 @@ import {
 type PreferenceGroup = 'languages' | 'ageRatings';
 
 const dialog = document.querySelector<HTMLDialogElement>('[data-content-settings]');
-const restartButton = dialog?.querySelector<HTMLButtonElement>('[data-settings-restart-onboarding]');
-const isStandalonePwa =
-  window.matchMedia('(display-mode: standalone)').matches ||
-  Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
 
 function getCheckboxes(group: PreferenceGroup): HTMLInputElement[] {
   return dialog
@@ -87,4 +83,3 @@ window.addEventListener('storage', (event) => {
 });
 
 syncForm();
-if (restartButton) restartButton.hidden = !isStandalonePwa;

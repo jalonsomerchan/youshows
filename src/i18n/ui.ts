@@ -2,12 +2,16 @@ import { defaultLocale, locales, type Locale } from '../config/site';
 import { joinPathSegments, stripBasePath, withBasePath } from '../utils/paths';
 import en from './translations/en.json';
 import es from './translations/es.json';
+import ca from './translations/ca.json';
+import eu from './translations/eu.json';
 
 export type TranslationKey = keyof typeof es;
 
 const translations: Record<Locale, typeof es> = {
   es,
   en,
+  ca,
+  eu,
 };
 
 export function isLocale(locale: string | undefined): locale is Locale {

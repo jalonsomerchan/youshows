@@ -29,7 +29,9 @@ Esto significa:
 src/i18n/
 ├── translations/
 │   ├── es.json
-│   └── en.json
+│   ├── en.json
+│   ├── ca.json
+│   └── eu.json
 └── ui.ts
 ```
 
@@ -64,7 +66,7 @@ Incorrecto:
 ## Añadir una nueva clave de traducción
 
 1. Añade la clave en `src/i18n/translations/es.json`.
-2. Añade la misma clave en `src/i18n/translations/en.json`.
+2. Añade la misma clave en todos los JSON de `src/i18n/translations/`.
 3. Usa la clave con `t('clave')`.
 
 Ejemplo:

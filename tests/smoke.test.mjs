@@ -194,7 +194,6 @@ describe('project smoke checks', () => {
     assert.match(contentPreferences, /alon-kids\.content-onboarding\.v1/);
     assert.match(contentOnboarding, /isContentOnboardingComplete/);
     assert.match(contentOnboarding, /completeWithAllContent/);
-    assert.match(contentOnboarding, /display-mode: standalone/);
     assert.match(contentPreferences, /restartContentOnboarding/);
     assert.match(contentSettings, /data-settings-restart-onboarding/);
     assert.match(onboardingComponent, /data-onboarding-panel="languages"/);
